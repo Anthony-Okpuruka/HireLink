@@ -3,28 +3,15 @@
 import Link from "next/link";
 import { Search, Briefcase, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 export default function HomePage() {
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white text-gray-800">
-        <nav className="flex justify-between items-center px-8 py-5">
-          <Link href="/" className="text-2xl font-bold tracking-tight">
-            <h1 className="text-2xl font-bold tracking-tight">HireLink</h1>
-          </Link>
-
-          <div className="space-x-6 hidden md:flex">
-            <Link href="/jobs">Jobs</Link>
-            <Link href="/companies">Companies</Link>
-            <Link href="/about">About</Link>
-          </div>
-
-          <button className="bg-black text-white px-4 py-2 rounded-xl">
-            <Link href="/register">Sign Up</Link>
-          </button>
-        </nav>
-
-        <section className="px-8 py-16">
+        <Navbar />
+        <section className="px-8 py-16 mt-25">
           <h2 className="text-4xl font-bold mb-4">
             Find Work That Fits Your Life
           </h2>
@@ -97,7 +84,11 @@ export default function HomePage() {
         <button className="bg-black text-white px-8 py-3 rounded-xl">
           Get Started
         </button>
+
+      
       </section>
+
+      <Footer/>
     </>
   );
 }
