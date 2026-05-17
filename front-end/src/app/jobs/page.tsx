@@ -5,6 +5,8 @@ import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Search, Briefcase, MapPin, Filter, X } from "lucide-react";
 import JobCard from "@/components/JobCard";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 
 // Sample job data - replace with actual API call
 const MOCK_JOBS = [
@@ -265,9 +267,10 @@ function JobsPageContent() {
     (filters.salaryRange ? 1 : 0);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 to-white text-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white text-gray-800">
+      <Navbar />
       {/* Header */}
-      <section className="px-8 py-12">
+      <section className="px-8 py-12 mt-25">
         <h2 className="text-4xl font-bold mb-3">Job Opportunities</h2>
         <p className="text-gray-500 mb-8">
           Browse our latest job postings across all industries.
@@ -478,6 +481,9 @@ function JobsPageContent() {
           Load More Jobs
         </button>
       </section>
+
+
+      <Footer/>
     </div>
   );
 }

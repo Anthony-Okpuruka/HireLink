@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { Search, Briefcase, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
-import Footer from "@/components/Footer";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import { Job } from "@/types";
 
 export default function HomePage() {
@@ -48,8 +49,9 @@ export default function HomePage() {
 
   return (
     <>
-      <div className="min-h-screen bg-linear-to-br from-slate-50 to-white text-gray-800">
-        <section className="px-8 py-16">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white text-gray-800">
+        <Navbar />
+        <section className="px-8 py-16 mt-25">
           <h2 className="text-4xl font-bold mb-4">
             Find Work That Fits Your Life
           </h2>
@@ -131,6 +133,19 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      <section className="px-8 py-16 text-center">
+        <h3 className="text-3xl font-bold mb-4">
+          Ready to Start Your Career Journey?
+        </h3>
+        <button className="bg-black text-white px-8 py-3 rounded-xl">
+          Get Started
+        </button>
+
+      
+      </section>
+
+      <Footer/>
     </>
   );
 }
