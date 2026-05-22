@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell, UserCircle } from "lucide-react";
+import {motion} from "framer-motion";
 
 export default function Dashboard() {
   return (
@@ -89,6 +90,12 @@ export default function Dashboard() {
               <div className="w-full bg-slate-100 rounded-full h-2.5">
                 <div className="bg-cyan-500 h-2.5 rounded-full w-1/2"></div>
               </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="grid md:grid-cols-3 gap-6 mb-10"
+                ></motion.div>
             </div>
           </div>
         </section>
