@@ -3,15 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { 
-  Search, 
-  Briefcase, 
-  MapPin, 
+import {
+  Search,
+  Briefcase,
+  MapPin,
   ArrowRight,
   UserPlus,
   FileCheck,
   Building,
-  CheckCircle
+  CheckCircle,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
@@ -26,17 +26,38 @@ export default function HomePage() {
   const searchUrl = `/dashboard/jobs?search=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}`;
 
   const featuredJobs = [
-    { 
-      id: 1, title: "Senior Product Designer", company: "Linear", location: "San Francisco, CA", salary: "$140k - $180k", type: "Full-time • Remote", 
-      description: "We are looking for a Senior Product Designer to join our team. You will be responsible for designing new features and improving the overall user experience of our product.", tags: ["Figma", "UI/UX"] 
+    {
+      id: 1,
+      title: "Senior Product Designer",
+      company: "Linear",
+      location: "San Francisco, CA",
+      salary: "$140k - $180k",
+      type: "Full-time • Remote",
+      description:
+        "We are looking for a Senior Product Designer to join our team. You will be responsible for designing new features and improving the overall user experience of our product.",
+      tags: ["Figma", "UI/UX"],
     },
-    { 
-      id: 2, title: "Frontend Engineer", company: "Vercel", location: "Remote", salary: "$120k - $160k", type: "Full-time • Remote", 
-      description: "Join our frontend team to build the future of the web. You will work on core features of our platform and help improve our developer experience.", tags: ["React", "Next.js"] 
+    {
+      id: 2,
+      title: "Frontend Engineer",
+      company: "Vercel",
+      location: "Remote",
+      salary: "$120k - $160k",
+      type: "Full-time • Remote",
+      description:
+        "Join our frontend team to build the future of the web. You will work on core features of our platform and help improve our developer experience.",
+      tags: ["React", "Next.js"],
     },
-    { 
-      id: 3, title: "Product Manager", company: "Stripe", location: "New York, NY", salary: "$130k - $170k", type: "Full-time • Hybrid", 
-      description: "We are looking for a Product Manager to lead our payments team. You will be responsible for defining the product roadmap and working closely with engineering.", tags: ["Payments", "Strategy"] 
+    {
+      id: 3,
+      title: "Product Manager",
+      company: "Stripe",
+      location: "New York, NY",
+      salary: "$130k - $170k",
+      type: "Full-time • Hybrid",
+      description:
+        "We are looking for a Product Manager to lead our payments team. You will be responsible for defining the product roadmap and working closely with engineering.",
+      tags: ["Payments", "Strategy"],
     },
   ];
 
@@ -64,7 +85,9 @@ export default function HomePage() {
               </span>
             </h1>
             <p className="text-lg text-slate-600 mb-10 max-w-lg leading-relaxed">
-              Discover the best remote, hybrid, and on-site opportunities tailored to your skills. Your next career move is just a search away.
+              Discover the best remote, hybrid, and on-site opportunities
+              tailored to your skills. Your next career move is just a search
+              away.
             </p>
 
             {/* Glassmorphism Search Bar */}
@@ -105,11 +128,11 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative h-[400px] lg:h-[600px] w-full"
           >
-            <Image 
-              src="/Job hunt-cuate.png" 
-              alt="Job Hunt Illustration" 
-              fill 
-              className="object-contain drop-shadow-2xl" 
+            <Image
+              src="/Job hunt-cuate.png"
+              alt="Job Hunt Illustration"
+              fill
+              className="object-contain drop-shadow-2xl"
               priority
             />
           </motion.div>
@@ -120,20 +143,36 @@ export default function HomePage() {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">How HireLink Works</h2>
-            <p className="text-slate-500 max-w-2xl mx-auto">Get started in three simple steps and land your dream job faster than ever before.</p>
+            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+              How HireLink Works
+            </h2>
+            <p className="text-slate-500 max-w-2xl mx-auto">
+              A quick, three-step path to find, apply, and get hired.
+            </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 relative">
             {/* Connecting Line */}
             <div className="hidden md:block absolute top-1/2 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-indigo-100 via-indigo-200 to-indigo-100 -translate-y-1/2 -z-0" />
-            
+
             {[
-              { icon: UserPlus, title: "1. Create Account", desc: "Sign up and build your professional profile in minutes." },
-              { icon: Search, title: "2. Search Jobs", desc: "Browse thousands of opportunities that match your skills." },
-              { icon: FileCheck, title: "3. Apply & Get Hired", desc: "Submit applications with a single click and get hired." }
+              {
+                icon: UserPlus,
+                title: "1. Create Account",
+                desc: "Sign up and build your professional profile in minutes.",
+              },
+              {
+                icon: Search,
+                title: "2. Search Jobs",
+                desc: "Browse thousands of opportunities that match your skills.",
+              },
+              {
+                icon: FileCheck,
+                title: "3. Apply & Get Hired",
+                desc: "Submit applications with a single click and get hired.",
+              },
             ].map((step, i) => (
-              <motion.div 
+              <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -157,31 +196,63 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-8">
           <div className="flex justify-between items-end mb-12">
             <div>
-              <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">Popular Categories</h2>
-              <p className="text-slate-500">Explore jobs across top industry sectors.</p>
+              <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+                Popular Categories
+              </h2>
+              <p className="text-slate-500">
+                Explore jobs across top industries.
+              </p>
             </div>
-            <Link href="/dashboard/jobs" className="hidden sm:flex items-center gap-2 text-indigo-600 font-medium hover:text-indigo-700 transition-colors">
+            <Link
+              href="/dashboard/jobs"
+              className="hidden sm:flex items-center gap-2 text-indigo-600 font-medium hover:text-indigo-700 transition-colors"
+            >
               View all <ArrowRight size={18} />
             </Link>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { name: "Design", image: "/Design team-rafiki.png", jobs: "120+ jobs" },
-              { name: "Development", image: "/Software engineer-amico.png", jobs: "300+ jobs" },
-              { name: "Marketing", image: "/Marketing consulting-pana.png", jobs: "85+ jobs" },
-              { name: "Finance", image: "/Accountant-rafiki.png", jobs: "50+ jobs" }
+              {
+                name: "Design",
+                image: "/Design team-rafiki.png",
+                jobs: "120+ jobs",
+              },
+              {
+                name: "Development",
+                image: "/Software engineer-amico.png",
+                jobs: "300+ jobs",
+              },
+              {
+                name: "Marketing",
+                image: "/Marketing consulting-pana.png",
+                jobs: "85+ jobs",
+              },
+              {
+                name: "Finance",
+                image: "/Accountant-rafiki.png",
+                jobs: "50+ jobs",
+              },
             ].map((cat, i) => (
-              <motion.div 
-                key={i} 
+              <motion.div
+                key={i}
                 whileHover={{ y: -8 }}
                 className="bg-white p-6 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center cursor-pointer border border-slate-100 group"
               >
                 <div className="w-32 h-32 relative mb-6 group-hover:scale-105 transition-transform duration-300">
-                  <Image src={cat.image} alt={cat.name} fill className="object-contain" />
+                  <Image
+                    src={cat.image}
+                    alt={cat.name}
+                    fill
+                    className="object-contain"
+                  />
                 </div>
-                <h3 className="font-semibold text-lg text-slate-900 mb-1">{cat.name}</h3>
-                <p className="text-sm text-indigo-600 font-medium bg-indigo-50 px-3 py-1 rounded-full">{cat.jobs}</p>
+                <h3 className="font-semibold text-lg text-slate-900 mb-1">
+                  {cat.name}
+                </h3>
+                <p className="text-sm text-indigo-600 font-medium bg-indigo-50 px-3 py-1 rounded-full">
+                  {cat.jobs}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -197,15 +268,20 @@ export default function HomePage() {
             <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-cyan-500/20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3" />
 
             <div className="lg:w-1/2 relative z-10 text-white">
-              <h2 className="text-3xl lg:text-5xl font-bold mb-6">Why Choose HireLink?</h2>
+              <h2 className="text-3xl lg:text-5xl font-bold mb-6">
+                Why Choose HireLink?
+              </h2>
               <p className="text-indigo-100 text-lg mb-8 leading-relaxed max-w-xl">
-                We bridge the gap between world-class talent and innovative companies. Whether you are looking for your next big career leap or searching for the perfect candidate, HireLink provides a seamless, intuitive, and powerful platform to make it happen.
+                We bridge the gap between world-class talent and innovative
+                companies. Whether you are looking for your next big career leap
+                or searching for the perfect candidate, HireLink provides a
+                seamless, intuitive, and powerful platform to make it happen.
               </p>
               <ul className="space-y-4 mb-10 text-indigo-50">
                 {[
                   "Verified companies and candidates",
                   "Advanced matching algorithms",
-                  "Dedicated support every step of the way"
+                  "Dedicated support every step of the way",
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-3">
                     <CheckCircle className="text-cyan-400" size={20} />
@@ -213,20 +289,20 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
-              <Link 
+              <Link
                 href="/about"
                 className="inline-flex items-center gap-2 bg-white text-indigo-900 px-8 py-4 rounded-xl font-semibold hover:bg-indigo-50 transition-colors shadow-lg"
               >
                 Learn More About Us <ArrowRight size={18} />
               </Link>
             </div>
-            
+
             <div className="lg:w-1/2 relative z-10 w-full aspect-square max-w-md mx-auto lg:mx-0">
-              <Image 
-                src="/about-hero.png" 
-                alt="About HireLink" 
-                fill 
-                className="object-contain drop-shadow-2xl" 
+              <Image
+                src="/about-hero.png"
+                alt="About HireLink"
+                fill
+                className="object-contain drop-shadow-2xl"
               />
             </div>
           </div>
@@ -238,15 +314,19 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-8">
           <div className="flex justify-between items-end mb-12">
             <div>
-              <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">Featured Jobs</h2>
-              <p className="text-slate-500">Hand-picked opportunities from top employers.</p>
+              <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+                Featured Jobs
+              </h2>
+              <p className="text-slate-500">
+                Hand-picked opportunities from top employers.
+              </p>
             </div>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredJobs.map((job) => (
               <div key={job.id}>
-                <JobCard 
+                <JobCard
                   id={job.id}
                   title={job.title}
                   company={job.company}

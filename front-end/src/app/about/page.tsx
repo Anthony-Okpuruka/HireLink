@@ -14,19 +14,18 @@ export default function about() {
           {/* Left Side */}
           <div>
             <span className="bg-[#F3EEE8] text-gray-800 px-4 py-2 rounded-full text-sm">
-              About HireLink
+              Our story
             </span>
 
-            <h1 className="text-6xl font-bold leading-tight mt-6 text-gray-900">
-              Connecting Talent <br />
-              With Opportunity
+            <h1 className="text-5xl md:text-6xl font-bold leading-tight mt-6 text-gray-900">
+              We connect talented people
+              <br /> with meaningful opportunities
             </h1>
 
-            <p className="text-gray-500 text-lg leading-8 mt-6">
-              HireLink is a modern platform that helps people discover remote,
-              hybrid, and on-site jobs from top companies around the world. Our
-              mission is to make job searching simple, accessible, and efficient
-              for everyone.
+            <p className="text-gray-600 text-lg leading-8 mt-6 max-w-xl">
+              At HireLink we help you discover remote, hybrid, and on-site roles
+              at companies that value thoughtful hiring. We focus on making job
+              search straightforward, fair, and — most importantly — human.
             </p>
 
             {/* Stats */}
@@ -135,7 +134,6 @@ export default function about() {
           </div>
         </div>
       </section>
-
 
       {/* Footer */}
       <Footer />
