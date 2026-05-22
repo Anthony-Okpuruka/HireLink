@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Login() {
   const [form, setForm] = useState({
@@ -24,57 +25,78 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 px-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
-        <div className="flex flex-col items-center mb-8">
-          <div className="text-3xl font-black tracking-tighter text-black mb-2">
-            Hire<span className="text-blue-600">Link</span>
+    <div className="min-h-screen flex bg-slate-50 font-sans selection:bg-indigo-100 selection:text-indigo-900">
+      {/* Left side: Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          <div className="flex flex-col mb-10">
+            <Link href="/" className="text-3xl font-extrabold tracking-tight text-slate-900 mb-8 inline-block hover:text-indigo-600 transition-colors">
+              HireLink
+            </Link>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+              Welcome Back
+            </h1>
+            <p className="text-slate-500">Sign in to continue to your account.</p>
           </div>
-          <h1 className="text-xl font-semibold text-slate-900">
-            Welcome Back
-          </h1>
-          <p className="text-slate-500 text-sm mt-1">Please enter your details</p>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700">Email</label>
+              <input
+                type="email"
+                name="email"
+                placeholder="name@company.com"
+                onChange={(e) => updateField("email", e.target.value)}
+                className="w-full p-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-900 bg-white"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="text-sm font-semibold text-slate-700">Password</label>
+                <Link href="#" className="text-sm text-indigo-600 font-medium hover:text-indigo-700">Forgot password?</Link>
+              </div>
+              <input
+                type="password"
+                name="password"
+                placeholder="••••••••"
+                onChange={(e) => updateField("password", e.target.value)}
+                className="w-full p-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-900 bg-white"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-slate-900 text-white py-4 rounded-xl font-semibold hover:bg-indigo-600 transition-colors active:scale-[0.99] shadow-md mt-4"
+            >
+              Sign in
+            </button>
+          </form>
+
+          <p className="text-center mt-8 text-slate-600 font-medium">
+            Don't have an account?{" "}
+            <Link href="/register" className="text-indigo-600 font-bold hover:underline">
+              Sign up for free
+            </Link>
+          </p>
         </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 ml-1">Email</label>
-            <input
-              type="email"
-              name="email"
-              placeholder="name@company.com"
-              onChange={(e) => updateField("email", e.target.value)}
-              className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-hidden transition-all text-slate-900"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 ml-1">Password</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              onChange={(e) => updateField("password", e.target.value)}
-              className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-hidden transition-all text-slate-900"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-slate-900 text-white py-3.5 rounded-xl font-semibold hover:bg-black transition-all active:scale-[0.98] shadow-lg shadow-slate-200"
-          >
-            Sign in
-          </button>
-        </form>
-
-        <p className="text-sm text-center mt-8 text-slate-600">
-          Don't have an account?{" "}
-          <Link href="/register" className="text-blue-600 font-semibold hover:underline">
-            Sign up for free
-          </Link>
-        </p>
+      {/* Right side: Illustration */}
+      <div className="hidden lg:flex w-1/2 bg-blue items-center justify-center p-12 relative overflow-hidden">
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px]  rounded-full blur-3xl translate-y-1/3 -translate-x-1/3" />
+        
+        <div className="relative w-full max-w-lg aspect-square">
+          <Image 
+            src="/illustrations/auth/Login-amico.png" 
+            alt="Authentication Security" 
+            fill 
+            className="object-contain drop-shadow-2xl" 
+            priority
+          />
+        </div>
       </div>
     </div>
   );

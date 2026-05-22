@@ -31,7 +31,7 @@ export const apiFetch = async <T = any>(endpoint: string, options: RequestInit =
 
   // Handle No Content responses
   if (response.status === 204) {
-    return null;
+    return null as any;
   }
 
   const data = await response.json();
