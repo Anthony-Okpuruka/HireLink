@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Home, ArrowLeft } from "lucide-react";
 
@@ -12,13 +13,9 @@ export default function NotFound() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="relative mb-8"
+          className="relative w-72 h-72 mx-auto mb-8"
         >
-          <div className="text-[12rem] font-black text-slate-200 select-none">
-            404
-          </div>
-          <div className="absolute inset-0 flex items-center justify-center">
-          </div>
+          <Image src="/illustrations/error/404 Error-pana.png" alt="404 Error" fill className="object-contain" priority />
         </motion.div>
 
         <motion.h1
@@ -68,7 +65,7 @@ export default function NotFound() {
           transition={{ delay: 0.8, duration: 1 }}
           className="mt-16 pt-8 border-t border-slate-200 flex justify-center gap-8 text-sm text-slate-400 font-medium"
         >
-          <Link href="/jobs" className="hover:text-blue-600 transition-colors">Browse Jobs</Link>
+          <Link href="/dashboard/jobs" className="hover:text-blue-600 transition-colors">Browse Jobs</Link>
           <Link href="/login" className="hover:text-blue-600 transition-colors">Sign In</Link>
           <Link href="/register" className="hover:text-blue-600 transition-colors">Register</Link>
         </motion.div>

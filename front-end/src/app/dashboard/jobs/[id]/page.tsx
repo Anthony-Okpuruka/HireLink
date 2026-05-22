@@ -8,8 +8,8 @@ export default function JobDetailPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold">Job Details</h1>
-      <p>Viewing details for job ID: {id}</p>
+      <h1 className="text-2xl font-bold">Job details & how to apply</h1>
+      <p className="text-sm text-slate-600">Viewing details for job ID: {id}</p>
     </div>
   );
 }

@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Search, Briefcase, MapPin, Filter, X } from "lucide-react";
 import JobCard from "@/components/JobCard";
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
 
 // Sample job data - replace with actual API call
 const MOCK_JOBS = [
@@ -267,15 +266,17 @@ function JobsPageContent() {
     (filters.salaryRange ? 1 : 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white text-gray-800">
-      <Navbar />
-      {/* Header */}
-      <section className="px-8 py-12 mt-25">
-        <h2 className="text-4xl font-bold mb-3">Job Opportunities</h2>
-        <p className="text-gray-500 mb-8">
-          Browse our latest job postings across all industries.
+    <div className="w-full text-slate-800">
+      <div className="mb-8 text-left max-w-2xl mt-2">
+        <p className="text-2xl font-light text-slate-800 tracking-tight leading-snug">
+          Discover opportunities that <span className="font-semibold text-blue-600">match your ambition</span>.
         </p>
-
+        <p className="text-slate-500 mt-2 text-sm">
+          Browse thousands of tailored job postings and find the perfect role for your next career move.
+        </p>
+      </div>
+      {/* Header */}
+      <section className="pb-8 pt-2">
         {/* Search Bar */}
         <div className="bg-white p-4 rounded-2xl shadow-lg flex flex-col md:flex-row gap-3">
           <div className="flex items-center gap-2 border border-gray-200 p-3 rounded-xl w-full">
@@ -434,34 +435,33 @@ function JobsPageContent() {
       </section>
 
       {/* Jobs Grid */}
-      <section className="px-8 py-12">
+      <section className="py-6">
         <div className="mb-6 flex items-center justify-between">
           <h3 className="text-xl font-semibold">
             {filteredJobs.length} Job{filteredJobs.length !== 1 ? "s" : ""}{" "}
             Found
           </h3>
-          <select className="border border-gray-200 rounded-lg px-4 py-2 bg-white">
-            <option>Most Recent</option>
-            <option>Most Relevant</option>
-            <option>Salary: High to Low</option>
-            <option>Salary: Low to High</option>
-          </select>
         </div>
 
         {filteredJobs.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <Search size={48} className="mx-auto" />
+          <div className="flex-grow flex flex-col items-center justify-center text-center max-w-md mx-auto py-12">
+            <div className="relative w-64 h-64 mb-6">
+              <Image 
+                src="/illustrations/empty/Empty-cuate.png" 
+                alt="No jobs found" 
+                fill 
+                className="object-contain"
+              />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No jobs found
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">
+              No matching jobs found
             </h3>
-            <p className="text-gray-500 mb-4">
-              Try adjusting your search criteria or filters
+            <p className="text-slate-500 mb-6 leading-relaxed">
+              We couldn't find any jobs matching your current search criteria. Try adjusting your filters or search terms.
             </p>
             <button
               onClick={clearFilters}
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="inline-flex items-center gap-2 bg-slate-900 text-white px-6 py-3.5 rounded-xl font-semibold hover:bg-indigo-600 transition-colors active:scale-95"
             >
               Clear all filters
             </button>
@@ -475,15 +475,6 @@ function JobsPageContent() {
         )}
       </section>
 
-      {/* Load More */}
-      <section className="px-8 py-12 text-center">
-        <button className="border border-gray-300 text-gray-800 px-8 py-3 rounded-xl hover:bg-gray-50 transition">
-          Load More Jobs
-        </button>
-      </section>
-
-
-      <Footer/>
     </div>
   );
 }
