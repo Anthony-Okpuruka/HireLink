@@ -1,5 +1,11 @@
 import { apiFetch, API_URL } from "./api";
-import { mockJobs, mockApplications, mockUsers, mockActivityLogs, logApiFallback } from "./mock-data";
+import {
+  mockJobs,
+  mockApplications,
+  mockUsers,
+  mockActivityLogs,
+  logApiFallback,
+} from "./mock-data";
 
 // ==========================================
 // TypeScript Types & Interfaces
@@ -97,9 +103,9 @@ export const apiService = {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
       try {
-        const res = await fetch(BASE_URL, { 
-          method: "GET", 
-          signal: controller.signal 
+        const res = await fetch(BASE_URL, {
+          method: "GET",
+          signal: controller.signal,
         });
         clearTimeout(timeoutId);
         return res.ok;
@@ -114,14 +120,18 @@ export const apiService = {
    * Authentication Services
    */
   auth: {
-    register: async (body: Record<string, any>): Promise<{ message: string; token: string; user: User }> => {
+    register: async (
+      body: Record<string, any>,
+    ): Promise<{ message: string; token: string; user: User }> => {
       return apiFetch("/auth/register", {
         method: "POST",
         body: JSON.stringify(body),
       });
     },
 
-    login: async (body: Record<string, any>): Promise<{ message: string; token: string; user: User }> => {
+    login: async (
+      body: Record<string, any>,
+    ): Promise<{ message: string; token: string; user: User }> => {
       return apiFetch("/auth/login", {
         method: "POST",
         body: JSON.stringify(body),
@@ -141,7 +151,9 @@ export const apiService = {
       });
     },
 
-    resetPassword: async (body: Record<string, any>): Promise<{ message: string }> => {
+    resetPassword: async (
+      body: Record<string, any>,
+    ): Promise<{ message: string }> => {
       return apiFetch("/auth/reset-password", {
         method: "POST",
         body: JSON.stringify(body),
@@ -153,19 +165,25 @@ export const apiService = {
    * User & Profile Services
    */
   users: {
-    getMe: async (): Promise<{ user: JobseekerProfile | EmployerProfile | User }> => {
+    getMe: async (): Promise<{
+      user: JobseekerProfile | EmployerProfile | User;
+    }> => {
       try {
         return await apiFetch("/users/me", {
           method: "GET",
         });
       } catch (err) {
         logApiFallback("/users/me", err);
-        const seeker = mockUsers.find(u => u.role === "jobseeker") as JobseekerProfile;
+        const seeker = mockUsers.find(
+          (u) => u.role === "jobseeker",
+        ) as JobseekerProfile;
         return { user: seeker };
       }
     },
 
-    updateMe: async (body: Record<string, any>): Promise<{ message: string; profile: any }> => {
+    updateMe: async (
+      body: Record<string, any>,
+    ): Promise<{ message: string; profile: any }> => {
       try {
         return await apiFetch("/users/me", {
           method: "PUT",
@@ -177,20 +195,34 @@ export const apiService = {
       }
     },
 
-    changePassword: async (body: Record<string, any>): Promise<{ message: string }> => {
-      return apiFetch("/users/me/password", {
-        method: "PUT",
-        body: JSON.stringify(body),
-      });
+    changePassword: async (
+      body: Record<string, any>,
+    ): Promise<{ message: string }> => {
+      try {
+        return await apiFetch("/users/me/password", {
+          method: "PUT",
+          body: JSON.stringify(body),
+        });
+      } catch (err) {
+        logApiFallback("/users/me/password [PUT]", err);
+        return { message: "Password updated in local preview" };
+      }
     },
 
     deleteMe: async (): Promise<{ message: string }> => {
-      return apiFetch("/users/me", {
-        method: "DELETE",
-      });
+      try {
+        return await apiFetch("/users/me", {
+          method: "DELETE",
+        });
+      } catch (err) {
+        logApiFallback("/users/me [DELETE]", err);
+        return { message: "Account deleted in local preview" };
+      }
     },
 
-    getUsers: async (params?: Record<string, any>): Promise<PaginatedResponse<User>> => {
+    getUsers: async (
+      params?: Record<string, any>,
+    ): Promise<PaginatedResponse<User>> => {
       const query = params ? `?${new URLSearchParams(params).toString()}` : "";
       try {
         return await apiFetch(`/users${query}`, {
@@ -212,14 +244,18 @@ export const apiService = {
       });
     },
 
-    getUserById: async (id: number): Promise<{ user: JobseekerProfile | EmployerProfile }> => {
+    getUserById: async (
+      id: number,
+    ): Promise<{ user: JobseekerProfile | EmployerProfile }> => {
       try {
         return await apiFetch(`/users/${id}`, {
           method: "GET",
         });
       } catch (err) {
         logApiFallback(`/users/${id}`, err);
-        const matched = mockUsers.find(u => u.id === id) as JobseekerProfile | EmployerProfile;
+        const matched = mockUsers.find((u) => u.id === id) as
+          | JobseekerProfile
+          | EmployerProfile;
         if (!matched) throw new Error("Mock user not found");
         return { user: matched };
       }
@@ -230,7 +266,9 @@ export const apiService = {
    * Job Posting & Search Services
    */
   jobs: {
-    getJobs: async (params?: Record<string, any>): Promise<PaginatedResponse<Job>> => {
+    getJobs: async (
+      params?: Record<string, any>,
+    ): Promise<PaginatedResponse<Job>> => {
       const query = params ? `?${new URLSearchParams(params).toString()}` : "";
       try {
         return await apiFetch(`/jobs${query}`, {
@@ -246,7 +284,9 @@ export const apiService = {
       }
     },
 
-    searchJobs: async (params: Record<string, any>): Promise<PaginatedResponse<Job>> => {
+    searchJobs: async (
+      params: Record<string, any>,
+    ): Promise<PaginatedResponse<Job>> => {
       const query = `?${new URLSearchParams(params).toString()}`;
       try {
         return await apiFetch(`/jobs/search${query}`, {
@@ -257,7 +297,9 @@ export const apiService = {
         // Basic offline search filter
         const text = (params.q || "").toLowerCase();
         const filtered = mockJobs.filter(
-          j => j.title.toLowerCase().includes(text) || j.description.toLowerCase().includes(text)
+          (j) =>
+            j.title.toLowerCase().includes(text) ||
+            j.description.toLowerCase().includes(text),
         );
         return {
           message: "Filtered from mock data",
@@ -274,13 +316,15 @@ export const apiService = {
         });
       } catch (err) {
         logApiFallback(`/jobs/${id}`, err);
-        const found = mockJobs.find(j => j.id === id);
+        const found = mockJobs.find((j) => j.id === id);
         if (!found) throw new Error("Mock job listing not found");
         return { job: found };
       }
     },
 
-    postJob: async (body: Record<string, any>): Promise<{ message: string; job: Job }> => {
+    postJob: async (
+      body: Record<string, any>,
+    ): Promise<{ message: string; job: Job }> => {
       try {
         return await apiFetch("/jobs", {
           method: "POST",
@@ -309,7 +353,10 @@ export const apiService = {
       }
     },
 
-    updateJob: async (id: number, body: Record<string, any>): Promise<{ message: string; job: Job }> => {
+    updateJob: async (
+      id: number,
+      body: Record<string, any>,
+    ): Promise<{ message: string; job: Job }> => {
       try {
         return await apiFetch(`/jobs/${id}`, {
           method: "PUT",
@@ -317,7 +364,7 @@ export const apiService = {
         });
       } catch (err) {
         logApiFallback(`/jobs/${id} [PUT]`, err);
-        const found = mockJobs.find(j => j.id === id);
+        const found = mockJobs.find((j) => j.id === id);
         if (!found) throw new Error("Mock job listing not found");
         const updated = { ...found, ...body };
         return { message: "Job updated in local preview", job: updated };
@@ -340,7 +387,10 @@ export const apiService = {
    * Application Processing Services
    */
   applications: {
-    apply: async (jobId: number, coverLetter?: string): Promise<{ message: string; application: Application }> => {
+    apply: async (
+      jobId: number,
+      coverLetter?: string,
+    ): Promise<{ message: string; application: Application }> => {
       try {
         return await apiFetch(`/apply/${jobId}`, {
           method: "POST",
@@ -348,7 +398,7 @@ export const apiService = {
         });
       } catch (err) {
         logApiFallback(`/apply/${jobId}`, err);
-        const associatedJob = mockJobs.find(j => j.id === jobId);
+        const associatedJob = mockJobs.find((j) => j.id === jobId);
         const mockApp: Application = {
           id: Date.now(),
           job_id: jobId,
@@ -363,11 +413,16 @@ export const apiService = {
           job_type: associatedJob?.job_type || "full-time",
         };
         mockApplications.unshift(mockApp);
-        return { message: "Application submitted in local preview", application: mockApp };
+        return {
+          message: "Application submitted in local preview",
+          application: mockApp,
+        };
       }
     },
 
-    getMyApplications: async (params?: Record<string, any>): Promise<PaginatedResponse<Application>> => {
+    getMyApplications: async (
+      params?: Record<string, any>,
+    ): Promise<PaginatedResponse<Application>> => {
       const query = params ? `?${new URLSearchParams(params).toString()}` : "";
       try {
         return await apiFetch(`/applications${query}`, {
@@ -377,7 +432,12 @@ export const apiService = {
         logApiFallback("/applications", err);
         return {
           message: "Loaded from mock data",
-          pagination: { total: mockApplications.length, page: 1, limit: 10, pages: 1 },
+          pagination: {
+            total: mockApplications.length,
+            page: 1,
+            limit: 10,
+            pages: 1,
+          },
           applications: mockApplications,
         };
       }
@@ -390,7 +450,7 @@ export const apiService = {
         });
       } catch (err) {
         logApiFallback(`/applications/${id} [DELETE]`, err);
-        const index = mockApplications.findIndex(a => a.id === id);
+        const index = mockApplications.findIndex((a) => a.id === id);
         if (index !== -1) {
           mockApplications.splice(index, 1);
         }
@@ -398,7 +458,10 @@ export const apiService = {
       }
     },
 
-    getJobApplications: async (jobId: number, params?: Record<string, any>): Promise<PaginatedResponse<Application>> => {
+    getJobApplications: async (
+      jobId: number,
+      params?: Record<string, any>,
+    ): Promise<PaginatedResponse<Application>> => {
       const query = params ? `?${new URLSearchParams(params).toString()}` : "";
       try {
         return await apiFetch(`/applications/job/${jobId}${query}`, {
@@ -406,7 +469,7 @@ export const apiService = {
         });
       } catch (err) {
         logApiFallback(`/applications/job/${jobId}`, err);
-        const filtered = mockApplications.filter(a => a.job_id === jobId);
+        const filtered = mockApplications.filter((a) => a.job_id === jobId);
         return {
           message: "Loaded from mock data",
           pagination: { total: filtered.length, page: 1, limit: 10, pages: 1 },
@@ -415,7 +478,10 @@ export const apiService = {
       }
     },
 
-    updateStatus: async (id: number, status: "accepted" | "rejected"): Promise<{ message: string; application: Application }> => {
+    updateStatus: async (
+      id: number,
+      status: "accepted" | "rejected",
+    ): Promise<{ message: string; application: Application }> => {
       try {
         return await apiFetch(`/applications/${id}/status`, {
           method: "PATCH",
@@ -423,10 +489,13 @@ export const apiService = {
         });
       } catch (err) {
         logApiFallback(`/applications/${id}/status [PATCH]`, err);
-        const found = mockApplications.find(a => a.id === id);
+        const found = mockApplications.find((a) => a.id === id);
         if (!found) throw new Error("Mock application not found");
         found.status = status;
-        return { message: "Status updated in local preview", application: found };
+        return {
+          message: "Status updated in local preview",
+          application: found,
+        };
       }
     },
   },
@@ -442,7 +511,9 @@ export const apiService = {
       } catch (err) {
         logApiFallback("/bookmarks [GET]", err);
         if (typeof window !== "undefined") {
-          return JSON.parse(localStorage.getItem("saved_job_ids") || "[]").map(Number);
+          return JSON.parse(localStorage.getItem("saved_job_ids") || "[]").map(
+            Number,
+          );
         }
         return [];
       }
@@ -457,10 +528,15 @@ export const apiService = {
       } catch (err) {
         logApiFallback("/bookmarks [POST]", err);
         if (typeof window !== "undefined") {
-          const savedIds = JSON.parse(localStorage.getItem("saved_job_ids") || "[]") as (string | number)[];
+          const savedIds = JSON.parse(
+            localStorage.getItem("saved_job_ids") || "[]",
+          ) as (string | number)[];
           const numericId = Number(jobId);
           if (!savedIds.map(Number).includes(numericId)) {
-            localStorage.setItem("saved_job_ids", JSON.stringify([...savedIds, numericId]));
+            localStorage.setItem(
+              "saved_job_ids",
+              JSON.stringify([...savedIds, numericId]),
+            );
           }
         }
         return { message: "Saved job in local preview" };
@@ -475,7 +551,9 @@ export const apiService = {
       } catch (err) {
         logApiFallback(`/bookmarks/${jobId} [DELETE]`, err);
         if (typeof window !== "undefined") {
-          const savedIds = JSON.parse(localStorage.getItem("saved_job_ids") || "[]") as (string | number)[];
+          const savedIds = JSON.parse(
+            localStorage.getItem("saved_job_ids") || "[]",
+          ) as (string | number)[];
           const updated = savedIds.filter((id) => Number(id) !== Number(jobId));
           localStorage.setItem("saved_job_ids", JSON.stringify(updated));
         }
@@ -488,7 +566,9 @@ export const apiService = {
    * Notifications Services
    */
   notifications: {
-    getNotifications: async (params?: Record<string, any>): Promise<PaginatedResponse<any>> => {
+    getNotifications: async (
+      params?: Record<string, any>,
+    ): Promise<PaginatedResponse<any>> => {
       const query = params ? `?${new URLSearchParams(params).toString()}` : "";
       try {
         return await apiFetch(`/notifications${query}`, {
@@ -512,14 +592,39 @@ export const apiService = {
         let filteredLogs = mockActivityLogs;
         if (userRole === "employer") {
           filteredLogs = [
-            { id: 1, text: "A new applicant, Alex Rivera, applied for your listing 'Junior Frontend Engineer'", timestamp: "2 hours ago", type: "application" },
-            { id: 2, text: "Your posting 'Product Designer' reached 45 active views today.", timestamp: "1 day ago", type: "view" },
-            { id: 3, text: "System Health Alert: Backup database completed successfully.", timestamp: "2 days ago", type: "system" }
+            {
+              id: 1,
+              text: "A new applicant, Alex Rivera, applied for your listing 'Junior Frontend Engineer'",
+              timestamp: "2 hours ago",
+              type: "application",
+            },
+            {
+              id: 2,
+              text: "Your posting 'Product Designer' reached 45 active views today.",
+              timestamp: "1 day ago",
+              type: "view",
+            },
+            {
+              id: 3,
+              text: "System Health Alert: Backup database completed successfully.",
+              timestamp: "2 days ago",
+              type: "system",
+            },
           ] as any;
         } else if (userRole === "admin") {
           filteredLogs = [
-            { id: 1, text: "System load spike warning: CPU reached 87%.", timestamp: "5 mins ago", type: "system" },
-            { id: 2, text: "There are 5 pending employer profile approvals in the queue.", timestamp: "2 hours ago", type: "application" }
+            {
+              id: 1,
+              text: "System load spike warning: CPU reached 87%.",
+              timestamp: "5 mins ago",
+              type: "system",
+            },
+            {
+              id: 2,
+              text: "There are 5 pending employer profile approvals in the queue.",
+              timestamp: "2 hours ago",
+              type: "application",
+            },
           ] as any;
         }
 
@@ -529,7 +634,9 @@ export const apiService = {
           type: log.type,
           message: log.text,
           read: false,
-          created_at: new Date(Date.now() - log.id * 4 * 3600 * 1000).toISOString(),
+          created_at: new Date(
+            Date.now() - log.id * 4 * 3600 * 1000,
+          ).toISOString(),
         }));
 
         return {
@@ -563,14 +670,39 @@ export const apiService = {
         let filteredLogs = mockActivityLogs;
         if (userRole === "employer") {
           filteredLogs = [
-            { id: 1, text: "A new applicant, Alex Rivera, applied for your listing 'Junior Frontend Engineer'", timestamp: "2 hours ago", type: "application" },
-            { id: 2, text: "Your posting 'Product Designer' reached 45 active views today.", timestamp: "1 day ago", type: "view" },
-            { id: 3, text: "System Health Alert: Backup database completed successfully.", timestamp: "2 days ago", type: "system" }
+            {
+              id: 1,
+              text: "A new applicant, Alex Rivera, applied for your listing 'Junior Frontend Engineer'",
+              timestamp: "2 hours ago",
+              type: "application",
+            },
+            {
+              id: 2,
+              text: "Your posting 'Product Designer' reached 45 active views today.",
+              timestamp: "1 day ago",
+              type: "view",
+            },
+            {
+              id: 3,
+              text: "System Health Alert: Backup database completed successfully.",
+              timestamp: "2 days ago",
+              type: "system",
+            },
           ] as any;
         } else if (userRole === "admin") {
           filteredLogs = [
-            { id: 1, text: "System load spike warning: CPU reached 87%.", timestamp: "5 mins ago", type: "system" },
-            { id: 2, text: "There are 5 pending employer profile approvals in the queue.", timestamp: "2 hours ago", type: "application" }
+            {
+              id: 1,
+              text: "System load spike warning: CPU reached 87%.",
+              timestamp: "5 mins ago",
+              type: "system",
+            },
+            {
+              id: 2,
+              text: "There are 5 pending employer profile approvals in the queue.",
+              timestamp: "2 hours ago",
+              type: "application",
+            },
           ] as any;
         }
 
@@ -580,7 +712,9 @@ export const apiService = {
           type: log.type,
           message: log.text,
           read: false,
-          created_at: new Date(Date.now() - log.id * 4 * 3600 * 1000).toISOString(),
+          created_at: new Date(
+            Date.now() - log.id * 4 * 3600 * 1000,
+          ).toISOString(),
         }));
 
         return {
