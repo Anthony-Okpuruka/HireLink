@@ -34,14 +34,12 @@ const EmployerOverview: React.FC = () => {
   const [recentApplicants, setRecentApplicants] = useState<Applicant[]>([]);
   const [loadingDashboard, setLoadingDashboard] = useState(true);
 
-  // AUTH PROTECTION
   useEffect(() => {
     if (!isLoading && (!user || user.role !== "employer")) {
       router.replace("/");
     }
   }, [user, isLoading, router]);
 
-  // LOAD DATA (FIXED - uses real API structure)
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
@@ -61,7 +59,6 @@ const EmployerOverview: React.FC = () => {
           unreadNotifications: 0, // not available in current API
         });
 
-        // take latest 5 applicants
         const formattedApplicants: Applicant[] = applications
           .slice(0, 5)
           .map((app: any) => ({
@@ -84,7 +81,6 @@ const EmployerOverview: React.FC = () => {
     }
   }, [user]);
 
-  // LOADING STATE
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -93,14 +89,13 @@ const EmployerOverview: React.FC = () => {
     );
   }
 
-  // BLOCK UNAUTHORIZED ACCESS
   if (!user || user.role !== "employer") {
     return null;
   }
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      {/* HEADER */}
+
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
@@ -120,14 +115,13 @@ const EmployerOverview: React.FC = () => {
         </Link>
       </div>
 
-      {/* LOADING */}
       {loadingDashboard ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
         </div>
       ) : (
         <>
-          {/* STATS */}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             <div className="bg-white p-6 rounded-2xl shadow-sm border">
               <Briefcase className="text-blue-600" />
@@ -160,7 +154,6 @@ const EmployerOverview: React.FC = () => {
             </div>
           </div>
 
-          {/* RECENT APPLICANTS */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border">
             <div className="flex justify-between mb-4">
               <h2 className="text-xl font-semibold">
