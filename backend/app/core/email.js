@@ -85,3 +85,38 @@ export const sendApplicationStatusEmail = async ({
 
   await transporter.sendMail(mailOptions);
 };
+
+// Notify employer when a jobseeker applies
+export const sendNewApplicationEmail = async ({
+  toEmail,
+  employerName,
+  jobseekerName,
+  jobTitle,
+  jobId,
+}) => {
+  const applicationsUrl = `${process.env.CLIENT_URL}/applications/job/${jobId}`;
+
+  const mailOptions = {
+    from: `"Hirelink" <${process.env.EMAIL_USER}>`,
+    to: toEmail,
+    subject: `Hirelink — New application for ${jobTitle}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #4F46E5;">New Application Received</h2>
+        <p>Hi ${employerName},</p>
+        <p><strong>${jobseekerName}</strong> has applied for your job posting <strong>${jobTitle}</strong>.</p>
+        <p>Log in to review their application and profile.</p>
+        <a href="${applicationsUrl}"
+           style="display: inline-block; padding: 12px 24px;
+                  background-color: #4F46E5; color: white;
+                  text-decoration: none; border-radius: 5px;
+                  margin: 20px 0;">
+          View Applicants
+        </a>
+        <p>— The Hirelink Team</p>
+      </div>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};

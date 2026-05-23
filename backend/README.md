@@ -18,7 +18,7 @@ REST API for the HireLink job board platform — authentication, profiles, job l
 | **Salary range** | POST/PUT + filters | `salary_min` / `salary_max` on listings · `min_salary` / `max_salary` when querying |
 | **Date posted** | Search & filter | `posted_on`, `posted_after`, `posted_before` (`created_at`) |
 | **Applications** | `/api/apply`, `/api/applications` | Apply, list, withdraw, employer review, accept/reject |
-| **Notifications** | `/api/notifications` | Email + in-app alerts when application accepted/rejected (24h expiry) |
+| **Notifications** | `/api/notifications` | Email + in-app alerts for jobseekers (accept/reject) and employers (new application) |
 | **Pagination** | All list endpoints | `page` (default `1`) · `limit` (default `10`, max `100`) |
 
 **Roles:** `jobseeker` · `employer` · `admin`
@@ -54,7 +54,7 @@ backend/
     │   ├── applications.controller.js
     │   ├── applications.model.js
     │   └── applications.utils.js       # jobseeker_id → user_id in API
-    ├── notifications/                  # In-app notifications for jobseekers
+    ├── notifications/                  # In-app notifications (jobseekers & employers)
     └── core/
         ├── db.js
         ├── middleware.js               # protect, restrictTo
@@ -157,7 +157,7 @@ Optional on every list endpoint:
 | `GET /api/jobs/search` | Authenticated |
 | `GET /api/applications` | Jobseeker |
 | `GET /api/applications/job/:job_id` | Employer (job owner) |
-| `GET /api/notifications` | Jobseeker |
+| `GET /api/notifications` | Jobseeker, Employer |
 | `GET /api/users` | Admin |
 
 ```json
@@ -188,7 +188,7 @@ Empty pages return `200` with `"total": 0` and an empty array.
 | `/api/jobs` | JWT | Jobs, search, filter |
 | `/api/apply` | JWT | Submit application |
 | `/api/applications` | JWT | Manage applications |
-| `/api/notifications` | JWT | Jobseeker notifications |
+| `/api/notifications` | JWT | Jobseeker & employer notifications |
 
 ---
 
@@ -376,6 +376,8 @@ Content-Type: application/json
 
 Duplicate applications → `409`.
 
+The **employer** is notified via in-app notification and email when someone applies.
+
 ---
 
 ### Applications — `/api/applications`
@@ -459,6 +461,49 @@ Content-Type: application/json
 | Current status | Must be `applied` |
 | Auth | Employer must own the job |
 
+When status changes, the jobseeker receives an in-app notification and email.
+
+---
+
+### Notifications — `/api/notifications`
+
+In-app notifications expire after **24 hours**. Email requires `EMAIL_USER` / `EMAIL_PASS` in `.env`.
+
+| Trigger | Recipient | Type |
+| :--- | :--- | :--- |
+| Jobseeker applies | Employer | `new_application` |
+| Application accepted | Jobseeker | `application_accepted` |
+| Application rejected | Jobseeker | `application_rejected` |
+
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/` | Jobseeker, Employer | List your active notifications (paginated) |
+
+```http
+GET /api/notifications?page=1&limit=10
+Authorization: Bearer <token>
+```
+
+**Employer example** (new application):
+
+```json
+{
+  "type": "new_application",
+  "message": "Jane Doe applied for your job posting \"Software Engineer\".",
+  "read": false,
+  "expires_at": "2026-05-24T10:00:00.000Z"
+}
+```
+
+**Jobseeker example** (accepted):
+
+```json
+{
+  "type": "application_accepted",
+  "message": "Your application for \"Software Engineer\" was accepted by Acme Corp."
+}
+```
+
 ---
 
 ## Database Schema
@@ -511,6 +556,5 @@ Content-Type: application/json
 
 ## Not Yet Implemented
 
-- Notifications to employers on new applications
 - Resume file upload (`resume_url` text only)
 - Admin dashboard beyond user management

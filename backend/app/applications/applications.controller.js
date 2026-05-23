@@ -12,7 +12,7 @@ import { findUserById } from "../users/users.model.js";
 import { formatApplication, formatApplications } from "./applications.utils.js";
 import { parsePagination, buildPagination } from "../core/pagination.js";
 import { createNotification } from "../notifications/notifications.model.js";
-import { sendApplicationStatusEmail } from "../core/email.js";
+import { sendApplicationStatusEmail, sendNewApplicationEmail } from "../core/email.js";
 
 const getJobId = (req) => req.params.job_id || req.params.jobId;
 
@@ -35,9 +35,29 @@ export const applyForJob = async (req, res) => {
 
     const application = await createApplication(jobId, userId, cover_letter);
 
+    const jobseeker = await findUserById(userId);
+    const employer = await findUserById(job.employer_id);
+
+    const notificationMessage = `${jobseeker.name} applied for your job posting "${job.title}".`;
+
+    await createNotification(job.employer_id, "new_application", notificationMessage);
+
+    try {
+      await sendNewApplicationEmail({
+        toEmail: employer.email,
+        employerName: employer.name,
+        jobseekerName: jobseeker.name,
+        jobTitle: job.title,
+        jobId,
+      });
+    } catch (emailError) {
+      console.error("New application email error:", emailError.message);
+    }
+
     res.status(201).json({
       message: "Application submitted successfully",
       application: formatApplication(application),
+      notificationSent: true,
     });
   } catch (error) {
     console.error("Apply for job error:", error.message);

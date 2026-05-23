@@ -5,6 +5,6 @@ import { paginationQueryValidator } from "../core/validators.js";
 
 const router = express.Router();
 
-router.get("/", protect, restrictTo("jobseeker"), paginationQueryValidator, getMyNotifications);
+router.get("/", protect, restrictTo("jobseeker", "employer"), paginationQueryValidator, getMyNotifications);
 
 export default router;
