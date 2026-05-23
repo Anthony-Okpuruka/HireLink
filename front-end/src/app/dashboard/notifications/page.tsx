@@ -37,7 +37,7 @@ export default function NotificationsPage() {
       </AnimatePresence>
 
       {/* Header section with page title */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -52,7 +52,7 @@ export default function NotificationsPage() {
       </motion.div>
 
       {/* Premium Empty State Container */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
@@ -60,7 +60,7 @@ export default function NotificationsPage() {
       >
         {/* Dynamic Illustration Container */}
         <motion.div
-          animate={isRefreshing ? { 
+          animate={isRefreshing ? {
             scale: [1, 0.95, 1.02, 1],
             rotate: [0, -1, 1, 0],
           } : {}}
@@ -86,16 +86,7 @@ export default function NotificationsPage() {
 
         {/* Status Text Block */}
         <div className="max-w-md">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 rounded-full text-indigo-600 text-xs font-bold uppercase tracking-wider mb-4"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>All Caught Up</span>
-          </motion.div>
-          
+
           <h2 className="text-2xl font-bold text-slate-900 mb-3 tracking-tight">
             No unread notifications
           </h2>
@@ -113,7 +104,7 @@ export default function NotificationsPage() {
             <Search className="w-4.5 h-4.5" />
             <span>Browse Job Listings</span>
           </Link>
-          
+
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
