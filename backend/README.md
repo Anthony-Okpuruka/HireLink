@@ -18,6 +18,7 @@ REST API for the HireLink job board platform — authentication, profiles, job l
 | **Salary range** | POST/PUT + filters | `salary_min` / `salary_max` on listings · `min_salary` / `max_salary` when querying |
 | **Date posted** | Search & filter | `posted_on`, `posted_after`, `posted_before` (`created_at`) |
 | **Applications** | `/api/apply`, `/api/applications` | Apply, list, withdraw, employer review, accept/reject |
+| **Notifications** | `/api/notifications` | Email + in-app alerts when application accepted/rejected (24h expiry) |
 | **Pagination** | All list endpoints | `page` (default `1`) · `limit` (default `10`, max `100`) |
 
 **Roles:** `jobseeker` · `employer` · `admin`
@@ -53,6 +54,7 @@ backend/
     │   ├── applications.controller.js
     │   ├── applications.model.js
     │   └── applications.utils.js       # jobseeker_id → user_id in API
+    ├── notifications/                  # In-app notifications for jobseekers
     └── core/
         ├── db.js
         ├── middleware.js               # protect, restrictTo
@@ -63,7 +65,8 @@ backend/
         ├── init.sql
         └── migrations/
             ├── 001_applied_status.sql
-            └── 002_salary_range.sql
+            ├── 002_salary_range.sql
+            └── 003_notifications.sql
 ```
 
 ---
@@ -97,6 +100,7 @@ psql -d your_database_name -f app/core/init.sql
 ```bash
 psql -d your_database_name -f app/core/migrations/001_applied_status.sql
 psql -d your_database_name -f app/core/migrations/002_salary_range.sql
+psql -d your_database_name -f app/core/migrations/003_notifications.sql
 ```
 
 ### Environment variables
@@ -153,6 +157,7 @@ Optional on every list endpoint:
 | `GET /api/jobs/search` | Authenticated |
 | `GET /api/applications` | Jobseeker |
 | `GET /api/applications/job/:job_id` | Employer (job owner) |
+| `GET /api/notifications` | Jobseeker |
 | `GET /api/users` | Admin |
 
 ```json
@@ -183,6 +188,7 @@ Empty pages return `200` with `"total": 0` and an empty array.
 | `/api/jobs` | JWT | Jobs, search, filter |
 | `/api/apply` | JWT | Submit application |
 | `/api/applications` | JWT | Manage applications |
+| `/api/notifications` | JWT | Jobseeker notifications |
 
 ---
 
@@ -465,6 +471,7 @@ Content-Type: application/json
 | `jobs` | `title`, `description`, `location`, `industry`, `job_type`, `salary_min`, `salary_max`, `created_at` |
 | `applications` | `job_id`, `jobseeker_id`, `status`, `cover_letter`, `applied_at` |
 | `password_reset_tokens` | `token`, `expires_at` (15 min) |
+| `notifications` | `user_id`, `type`, `message`, `read`, `expires_at` (24h) |
 
 - Application statuses: `applied` (default) → `accepted` / `rejected`
 - `UNIQUE(job_id, jobseeker_id)` on applications
@@ -504,7 +511,6 @@ Content-Type: application/json
 
 ## Not Yet Implemented
 
-- Email notifications on application status changes
-- In-app notification system
+- Notifications to employers on new applications
 - Resume file upload (`resume_url` text only)
 - Admin dashboard beyond user management
