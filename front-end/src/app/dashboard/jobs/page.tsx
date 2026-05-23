@@ -6,120 +6,7 @@ import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Search, Briefcase, MapPin, Filter, X } from "lucide-react";
 import JobCard from "@/components/JobCard";
-
-// Sample job data - replace with actual API call
-const MOCK_JOBS = [
-  {
-    id: "1",
-    title: "Senior Frontend Developer",
-    company: "Tech Solutions Inc.",
-    location: "Remote",
-    type: "Full-time" as const,
-    salary: "$120k - $150k",
-    description:
-      "We're looking for an experienced frontend developer to lead our React migration project. Must have 5+ years experience.",
-    tags: ["React", "TypeScript", "Tailwind CSS"],
-  },
-  {
-    id: "2",
-    title: "UX/UI Designer",
-    company: "Creative Studio",
-    location: "New York, NY",
-    type: "Full-time" as const,
-    salary: "$90k - $120k",
-    description:
-      "Join our design team to create beautiful and intuitive user interfaces for web and mobile applications.",
-    tags: ["Figma", "UI/UX", "Prototyping"],
-  },
-  {
-    id: "3",
-    title: "Backend Engineer",
-    company: "DataStream Systems",
-    location: "San Francisco, CA",
-    type: "Full-time" as const,
-    salary: "$130k - $160k",
-    description:
-      "Build scalable backend systems with Node.js and PostgreSQL. Experience with microservices required.",
-    tags: ["Node.js", "PostgreSQL", "Docker"],
-  },
-  {
-    id: "4",
-    title: "Product Manager",
-    company: "StartupXYZ",
-    location: "Hybrid",
-    type: "Full-time" as const,
-    salary: "$100k - $140k",
-    description:
-      "Lead product strategy and development for our SaaS platform serving enterprise customers.",
-    tags: ["Product Strategy", "Agile", "Analytics"],
-  },
-  {
-    id: "5",
-    title: "Marketing Manager",
-    company: "BrandMax",
-    location: "Chicago, IL",
-    type: "Full-time" as const,
-    salary: "$85k - $110k",
-    description:
-      "Develop and execute marketing campaigns for B2B SaaS products targeting enterprise clients.",
-    tags: ["Digital Marketing", "SEO", "Content"],
-  },
-  {
-    id: "6",
-    title: "DevOps Engineer",
-    company: "CloudNine",
-    location: "Remote",
-    type: "Full-time" as const,
-    salary: "$125k - $155k",
-    description:
-      "Manage infrastructure and deployment pipelines. Experience with AWS, Kubernetes, and CI/CD required.",
-    tags: ["AWS", "Kubernetes", "CI/CD"],
-  },
-  {
-    id: "7",
-    title: "Data Scientist",
-    company: "Analytics Pro",
-    location: "Boston, MA",
-    type: "Full-time" as const,
-    salary: "$110k - $145k",
-    description:
-      "Build machine learning models and data pipelines to drive business insights and optimization.",
-    tags: ["Python", "Machine Learning", "SQL"],
-  },
-  {
-    id: "8",
-    title: "Junior Developer",
-    company: "Learning Labs",
-    location: "Remote",
-    type: "Full-time" as const,
-    salary: "$60k - $80k",
-    description:
-      "Great opportunity for early-career developers. We provide mentorship and training while you build real projects.",
-    tags: ["JavaScript", "React", "CSS"],
-  },
-  {
-    id: "9",
-    title: "Mobile Developer",
-    company: "App Innovations",
-    location: "Austin, TX",
-    type: "Full-time" as const,
-    salary: "$105k - $135k",
-    description:
-      "Develop iOS and Android applications using React Native. Portfolio of published apps required.",
-    tags: ["React Native", "Mobile", "TypeScript"],
-  },
-  {
-    id: "10",
-    title: "QA Automation Engineer",
-    company: "QualityFirst",
-    location: "Hybrid",
-    type: "Full-time" as const,
-    salary: "$95k - $125k",
-    description:
-      "Create automated test suites and ensure product quality across all platforms and browsers.",
-    tags: ["Selenium", "Testing", "Python"],
-  },
-];
+import { apiService, Job } from "@/lib/api-service";
 
 function JobsPageContent() {
   const searchParams = useSearchParams();
@@ -128,11 +15,33 @@ function JobsPageContent() {
 
   const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [locationTerm, setLocationTerm] = useState(initialLocation);
+  
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load Job Listings
+  useEffect(() => {
+    async function loadJobs() {
+      setIsLoading(true);
+      try {
+        const response = await apiService.jobs.getJobs();
+        if (response && response.jobs) {
+          setJobs(response.jobs);
+        }
+      } catch (err) {
+        console.error("Failed to retrieve listings:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadJobs();
+  }, []);
 
   useEffect(() => {
     setSearchTerm(initialSearch);
     setLocationTerm(initialLocation);
   }, [initialSearch, initialLocation]);
+
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     jobType: [] as string[],
@@ -155,16 +64,14 @@ function JobsPageContent() {
 
   // Filtered jobs based on search and filters
   const filteredJobs = useMemo(() => {
-    return MOCK_JOBS.filter((job) => {
-      // Search term filter (title, company, description, tags)
+    return jobs.filter((job) => {
+      // Search term filter (title, employer_name, description, etc.)
+      const companyName = job.employer_name || "";
       const matchesSearch =
         searchTerm === "" ||
         job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.tags.some((tag) =>
-          tag.toLowerCase().includes(searchTerm.toLowerCase()),
-        );
+        companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.description.toLowerCase().includes(searchTerm.toLowerCase());
 
       // Location filter
       const matchesLocation =
@@ -172,33 +79,36 @@ function JobsPageContent() {
         job.location.toLowerCase().includes(locationTerm.toLowerCase());
 
       // Job type filter
+      const jobTypeProp = job.job_type || "full-time";
       const matchesJobType =
-        filters.jobType.length === 0 || filters.jobType.includes(job.type);
+        filters.jobType.length === 0 ||
+        filters.jobType.some(
+          (t) => t.toLowerCase() === jobTypeProp.toLowerCase()
+        );
 
-      // Location type filter
+      // Location type filter (Remote / Hybrid / On-site)
       const matchesLocationType =
         filters.location.length === 0 ||
         filters.location.some((loc) =>
-          job.location.toLowerCase().includes(loc.toLowerCase()),
+          job.location.toLowerCase().includes(loc.toLowerCase())
         );
 
       // Salary range filter
       const matchesSalary = (() => {
         if (!filters.salaryRange) return true;
-        const salary = job.salary?.replace(/[$,k]/g, "") || "";
-        const [min, max] = salary.split(" - ").map((s) => parseInt(s));
-
+        const sMin = job.salary_min || 0;
+        
         switch (filters.salaryRange) {
           case "Under $50k":
-            return min < 50;
+            return sMin < 50000;
           case "$50k - $80k":
-            return min >= 50 && min <= 80;
+            return sMin >= 50000 && sMin <= 80000;
           case "$80k - $120k":
-            return min >= 80 && min <= 120;
+            return sMin >= 80000 && sMin <= 120000;
           case "$120k - $150k":
-            return min >= 120 && min <= 150;
+            return sMin >= 120000 && sMin <= 150000;
           case "$150k+":
-            return min >= 150;
+            return sMin >= 150000;
           default:
             return true;
         }
@@ -231,19 +141,19 @@ function JobsPageContent() {
         matchesExperience
       );
     });
-  }, [searchTerm, locationTerm, filters]);
+  }, [jobs, searchTerm, locationTerm, filters]);
 
   const handleFilterChange = (
     filterType: string,
     value: string,
-    checked: boolean,
+    checked: boolean
   ) => {
     setFilters((prev) => ({
       ...prev,
       [filterType]: checked
         ? [...(prev[filterType as keyof typeof prev] as string[]), value]
         : (prev[filterType as keyof typeof prev] as string[]).filter(
-            (item) => item !== value,
+            (item) => item !== value
           ),
     }));
   };
@@ -265,93 +175,113 @@ function JobsPageContent() {
     filters.experienceLevel.length +
     (filters.salaryRange ? 1 : 0);
 
+  if (isLoading) {
+    return (
+      <div className="w-full space-y-6 animate-pulse mt-2">
+        <div className="h-16 bg-slate-200 rounded-xl" />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-64 bg-slate-200 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full text-slate-800">
-      <div className="mb-8 text-left max-w-2xl mt-2">
+    <div className="w-full text-slate-800 font-sans pb-16">
+      
+      {/* Title Segment */}
+      <div className="mb-8 text-left max-w-2xl mt-2 space-y-2">
         <p className="text-2xl font-light text-slate-800 tracking-tight leading-snug">
-          Discover opportunities that <span className="font-semibold text-blue-600">match your ambition</span>.
+          Discover opportunities that <span className="font-extrabold text-indigo-600">match your ambition</span>.
         </p>
-        <p className="text-slate-500 mt-2 text-sm">
+        <p className="text-slate-500 text-sm">
           Browse thousands of tailored job postings and find the perfect role for your next career move.
         </p>
       </div>
-      {/* Header */}
+
+      {/* Header Search Section */}
       <section className="pb-8 pt-2">
-        {/* Search Bar */}
-        <div className="bg-white p-4 rounded-2xl shadow-lg flex flex-col md:flex-row gap-3">
-          <div className="flex items-center gap-2 border border-gray-200 p-3 rounded-xl w-full">
-            <Briefcase size={18} className="text-gray-600" />
+        
+        {/* Search Input Box */}
+        <div className="bg-white p-4 rounded-xl shadow-md border border-slate-100 flex flex-col md:flex-row gap-3">
+          <div className="flex items-center gap-2 border border-slate-100 p-3 rounded-lg w-full">
+            <Briefcase size={18} className="text-slate-400" />
             <input
               placeholder="Job title or keyword"
-              className="outline-none w-full"
+              className="outline-none w-full text-sm text-slate-800"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          <div className="flex items-center gap-2 border border-gray-200 p-3 rounded-xl w-full">
-            <MapPin size={18} className="text-gray-600" />
+          <div className="flex items-center gap-2 border border-slate-100 p-3 rounded-lg w-full">
+            <MapPin size={18} className="text-slate-400" />
             <input
               placeholder="Location"
-              className="outline-none w-full"
+              className="outline-none w-full text-sm text-slate-800"
               value={locationTerm}
               onChange={(e) => setLocationTerm(e.target.value)}
             />
           </div>
 
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`px-6 py-3 rounded-xl flex items-center gap-2 whitespace-nowrap transition ${
-              showFilters
-                ? "bg-gray-200 text-gray-800"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            <Filter size={18} />
-            Filters
-            {activeFiltersCount > 0 && (
-              <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                {activeFiltersCount}
-              </span>
-            )}
-          </button>
+          <div className="flex gap-3 shrink-0">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`px-5 py-3 rounded-lg flex items-center gap-2 text-sm font-semibold transition ${
+                showFilters
+                  ? "bg-slate-200 text-slate-800"
+                  : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              <Filter size={16} />
+              Filters
+              {activeFiltersCount > 0 && (
+                <span className="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full font-black">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
 
-          <button className="bg-black text-white px-6 py-3 rounded-xl flex items-center gap-2 whitespace-nowrap hover:bg-gray-800 transition">
-            <Search size={18} />
-            Search
-          </button>
+            <button className="bg-slate-900 text-white px-6 py-3 rounded-lg flex items-center gap-2 text-sm font-black hover:bg-slate-800 transition shadow-sm shrink-0">
+              <Search size={16} />
+              Search
+            </button>
+          </div>
         </div>
 
-        {/* Filters Panel */}
+        {/* Filters Toggleable Panel */}
         {showFilters && (
-          <div className="bg-white p-6 rounded-2xl shadow-lg mt-4">
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-100 mt-4">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold">Filters</h3>
+              <h3 className="text-sm font-black uppercase tracking-wider text-slate-800">Advanced Filters</h3>
               <button
                 onClick={clearFilters}
-                className="text-gray-500 hover:text-gray-700 flex items-center gap-2"
+                className="text-xs font-bold text-slate-400 hover:text-indigo-600 flex items-center gap-1.5 transition-colors"
               >
-                <X size={16} />
+                <X size={14} />
                 Clear all
               </button>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              
               {/* Job Type */}
               <div>
-                <h4 className="font-medium mb-3">Job Type</h4>
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Job Type</h4>
                 <div className="space-y-2">
                   {jobTypes.map((type) => (
-                    <label key={type} className="flex items-center gap-2">
+                    <label key={type} className="flex items-center gap-2.5 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={filters.jobType.includes(type)}
                         onChange={(e) =>
                           handleFilterChange("jobType", type, e.target.checked)
                         }
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-slate-200 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
                       />
-                      <span className="text-sm">{type}</span>
+                      <span className="text-xs font-semibold text-slate-600">{type}</span>
                     </label>
                   ))}
                 </div>
@@ -359,23 +289,19 @@ function JobsPageContent() {
 
               {/* Location Type */}
               <div>
-                <h4 className="font-medium mb-3">Work Location</h4>
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Work Location</h4>
                 <div className="space-y-2">
-                  {locations.map((location) => (
-                    <label key={location} className="flex items-center gap-2">
+                  {locations.map((loc) => (
+                    <label key={loc} className="flex items-center gap-2.5 cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={filters.location.includes(location)}
+                        checked={filters.location.includes(loc)}
                         onChange={(e) =>
-                          handleFilterChange(
-                            "location",
-                            location,
-                            e.target.checked,
-                          )
+                          handleFilterChange("location", loc, e.target.checked)
                         }
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-slate-200 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
                       />
-                      <span className="text-sm">{location}</span>
+                      <span className="text-xs font-semibold text-slate-600">{loc}</span>
                     </label>
                   ))}
                 </div>
@@ -383,10 +309,10 @@ function JobsPageContent() {
 
               {/* Salary Range */}
               <div>
-                <h4 className="font-medium mb-3">Salary Range</h4>
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Salary Range</h4>
                 <div className="space-y-2">
                   {salaryRanges.map((range) => (
-                    <label key={range} className="flex items-center gap-2">
+                    <label key={range} className="flex items-center gap-2.5 cursor-pointer">
                       <input
                         type="radio"
                         name="salaryRange"
@@ -398,9 +324,9 @@ function JobsPageContent() {
                             salaryRange: e.target.value,
                           }))
                         }
-                        className="border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="border-slate-200 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
                       />
-                      <span className="text-sm">{range}</span>
+                      <span className="text-xs font-semibold text-slate-600">{range}</span>
                     </label>
                   ))}
                 </div>
@@ -408,10 +334,10 @@ function JobsPageContent() {
 
               {/* Experience Level */}
               <div>
-                <h4 className="font-medium mb-3">Experience Level</h4>
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Experience Level</h4>
                 <div className="space-y-2">
                   {experienceLevels.map((level) => (
-                    <label key={level} className="flex items-center gap-2">
+                    <label key={level} className="flex items-center gap-2.5 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={filters.experienceLevel.includes(level)}
@@ -419,12 +345,12 @@ function JobsPageContent() {
                           handleFilterChange(
                             "experienceLevel",
                             level,
-                            e.target.checked,
+                            e.target.checked
                           )
                         }
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-slate-200 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
                       />
-                      <span className="text-sm">{level}</span>
+                      <span className="text-xs font-semibold text-slate-600">{level}</span>
                     </label>
                   ))}
                 </div>
@@ -434,34 +360,32 @@ function JobsPageContent() {
         )}
       </section>
 
-      {/* Jobs Grid */}
-      <section className="py-6">
-        <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-xl font-semibold">
-            {filteredJobs.length} Job{filteredJobs.length !== 1 ? "s" : ""}{" "}
-            Found
+      {/* Jobs Grid Section */}
+      <section className="py-2">
+        <div className="mb-6 flex items-center justify-between border-b border-slate-50 pb-4">
+          <h3 className="text-md font-black text-slate-800 tracking-tight">
+            {filteredJobs.length} Job{filteredJobs.length !== 1 ? "s" : ""} Available
           </h3>
         </div>
 
         {filteredJobs.length === 0 ? (
-          <div className="flex-grow flex flex-col items-center justify-center text-center max-w-md mx-auto py-12">
-            <div className="relative w-64 h-64 mb-6">
-              <Image 
-                src="/illustrations/empty/Empty-cuate.png" 
-                alt="No jobs found" 
-                fill 
-                className="object-contain"
-              />
+          <div className="flex-grow flex flex-col items-center justify-center text-center max-w-md mx-auto py-12 space-y-4">
+            <div className="relative w-64 h-48">
+              <div className="absolute inset-0 bg-indigo-50/50 rounded-2xl flex items-center justify-center text-slate-300">
+                <Briefcase size={64} className="stroke-[1]" />
+              </div>
             </div>
-            <h3 className="text-2xl font-bold text-slate-900 mb-2">
-              No matching jobs found
-            </h3>
-            <p className="text-slate-500 mb-6 leading-relaxed">
-              We couldn't find any jobs matching your current search criteria. Try adjusting your filters or search terms.
-            </p>
+            <div className="space-y-1">
+              <h3 className="text-lg font-extrabold text-slate-900">
+                No matching jobs found
+              </h3>
+              <p className="text-slate-400 text-xs font-semibold leading-relaxed">
+                We couldn't find any jobs matching your current search criteria. Try adjusting your filters or search terms.
+              </p>
+            </div>
             <button
               onClick={clearFilters}
-              className="inline-flex items-center gap-2 bg-slate-900 text-white px-6 py-3.5 rounded-xl font-semibold hover:bg-indigo-600 transition-colors active:scale-95"
+              className="inline-flex items-center gap-2 bg-slate-900 hover:bg-indigo-600 text-white text-xs font-black px-5 py-3 rounded-lg uppercase tracking-wider transition-colors active:scale-95 shadow-sm"
             >
               Clear all filters
             </button>
@@ -483,9 +407,9 @@ export default function JobsPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-lg text-gray-600 animate-pulse">
-            Loading Jobs...
+        <div className="min-h-[40vh] flex items-center justify-center">
+          <div className="text-sm font-semibold text-slate-400 animate-pulse">
+            Loading Listings...
           </div>
         </div>
       }
@@ -494,3 +418,4 @@ export default function JobsPage() {
     </Suspense>
   );
 }
+

@@ -1,15 +1,20 @@
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MapPin, Bookmark, Clock, DollarSign } from "lucide-react";
+import { apiService } from "@/lib/api-service";
 
 interface JobCardProps {
   id: string | number;
   title: string;
-  company: string;
+  company?: string;
+  employer_name?: string;
   location: string;
-  type: string;
-  salary?: string;
+  type?: string;
+  job_type?: string;
+  salary?: string | null;
   description: string;
   tags?: string[];
+  created_at?: string;
 }
 
 const colors = [
@@ -37,39 +42,99 @@ const getAvatarColor = (name: string) => {
   return colors[Math.abs(hash) % colors.length];
 };
 
+const getDaysAgo = (dateStr?: string) => {
+  if (!dateStr) return "2d ago";
+  try {
+    const date = new Date(dateStr);
+    const diffTime = Math.abs(Date.now() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays === 0 || isNaN(diffDays)) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    return `${diffDays}d ago`;
+  } catch {
+    return "2d ago";
+  }
+};
+
 export default function JobCard({
   id,
   title,
   company,
+  employer_name,
   location,
   type,
+  job_type,
   salary,
   description,
   tags = [],
+  created_at,
 }: JobCardProps) {
-  const avatarColor = getAvatarColor(company);
-  const initial = company.charAt(0).toUpperCase();
+  const companyName = company || employer_name || "Enterprise Partner";
+  const displayType = type || job_type || "full-time";
+  
+  const avatarColor = getAvatarColor(companyName);
+  const initial = companyName.charAt(0).toUpperCase();
+  const daysAgoText = getDaysAgo(created_at);
+
+  const [isSaved, setIsSaved] = useState(false);
+
+  // Hydrate saved status from localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedIds = JSON.parse(localStorage.getItem("saved_job_ids") || "[]");
+      setIsSaved(savedIds.includes(Number(id)) || savedIds.includes(String(id)));
+    }
+  }, [id]);
+
+  // Toggle bookmark in localStorage and backend
+  const toggleSave = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof window !== "undefined") {
+      const jobId = typeof id === "number" ? id : Number(id);
+      const wasSaved = isSaved;
+      
+      // Optimistic UI update
+      setIsSaved(!wasSaved);
+      
+      try {
+        if (wasSaved) {
+          await apiService.bookmarks.unsaveJob(jobId);
+        } else {
+          await apiService.bookmarks.saveJob(jobId);
+        }
+        window.dispatchEvent(new Event("saved_jobs_changed"));
+      } catch (err) {
+        // Revert state if something went wrong
+        setIsSaved(wasSaved);
+        console.error("Failed to sync bookmark action:", err);
+      }
+    }
+  };
 
   return (
-    <Link href={`/jobs/${id}`} className="block h-full group">
-      <div className="bg-white p-6 rounded-[1.25rem] shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 border border-slate-100 hover:border-slate-200 flex flex-col h-full -translate-y-0 hover:-translate-y-1">
+    <Link href={`/dashboard/jobs/${id}`} className="block h-full group">
+      <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 border border-slate-100 hover:border-slate-200/80 flex flex-col h-full -translate-y-0 hover:-translate-y-1">
         
         {/* Header */}
         <div className="flex justify-between items-start mb-4">
           <div className="flex gap-4 items-center min-w-0">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-bold border shrink-0 ${avatarColor}`}>
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold border shrink-0 ${avatarColor}`}>
               {initial}
             </div>
             <div className="min-w-0">
-              <h3 className="text-[1.1rem] font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate">{title}</h3>
-              <p className="text-slate-500 text-sm mt-0.5 truncate font-medium">{company}</p>
+              <h3 className="text-[1.05rem] font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate leading-snug">{title}</h3>
+              <p className="text-slate-500 text-sm mt-0.5 truncate font-medium">{companyName}</p>
             </div>
           </div>
           <button 
-            onClick={(e) => { e.preventDefault(); }} 
-            className="text-slate-300 hover:text-indigo-500 transition-colors shrink-0 ml-4 p-1 rounded-full hover:bg-indigo-50"
+            onClick={toggleSave} 
+            className={`transition-colors shrink-0 ml-4 p-1 rounded-full hover:bg-indigo-50 ${
+              isSaved ? "text-indigo-600" : "text-slate-300 hover:text-indigo-500"
+            }`}
+            title={isSaved ? "Remove Bookmark" : "Bookmark Job"}
           >
-            <Bookmark size={20} strokeWidth={2} />
+            <Bookmark size={20} strokeWidth={2} fill={isSaved ? "currentColor" : "none"} />
           </button>
         </div>
 
@@ -92,18 +157,18 @@ export default function JobCard({
         {/* Footer info (Tags & Time) */}
         <div className="flex items-center justify-between mt-auto pt-5 border-t border-slate-50">
           <div className="flex items-center gap-2">
-            <span className="bg-slate-100 text-slate-600 text-[11px] uppercase tracking-wide px-2.5 py-1 rounded-md font-bold">
-              {type.split('•')[0].trim()}
+            <span className="bg-slate-100 text-slate-600 text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-md font-bold">
+              {displayType.split('•')[0].trim()}
             </span>
             {tags && tags.length > 0 && (
-              <span className="bg-indigo-50 text-indigo-700 text-[11px] uppercase tracking-wide px-2.5 py-1 rounded-md font-bold hidden sm:inline-block">
+              <span className="bg-indigo-50 text-indigo-700 text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-md font-bold hidden sm:inline-block">
                 {tags[0]}
               </span>
             )}
           </div>
           <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
             <Clock size={13} strokeWidth={2.5} />
-            2d ago
+            {daysAgoText}
           </div>
         </div>
       </div>
