@@ -23,6 +23,7 @@ import { AuthProvider, useAuth } from "@/app/providers/AuthProvider";
 import { UserProfile } from "@/components/dashboard/UserProfile";
 import { ApiStatusBadge } from "@/components/dashboard/ApiStatusBadge";
 import { LogoutButton } from "@/components/dashboard/LogoutButton";
+import { DevRoleSwitcher } from "@/components/dashboard/DevRoleSwitcher";
 
 interface NavItem {
   name: string;
@@ -36,7 +37,7 @@ interface NavSection {
   items: NavItem[];
 }
 
-export default function DashboardLayout({
+function DashboardLayoutContent({
   children,
 }: {
   children: React.ReactNode;
@@ -306,61 +307,74 @@ export default function DashboardLayout({
   );
 
   return (
+    <div className="min-h-screen flex bg-slate-50 font-sans text-slate-800">
+      {/* Desktop Sidebar */}
+      <motion.aside
+        className="hidden md:flex h-screen sticky top-0 shrink-0 z-30"
+        initial={{ width: 80 }}
+        animate={{ width: isSidebarExpanded ? 240 : 80 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        onMouseEnter={() => setIsSidebarExpanded(true)}
+        onMouseLeave={() => setIsSidebarExpanded(false)}
+      >
+        <SidebarContent isExpanded={isSidebarExpanded} />
+      </motion.aside>
+
+      {/* Main Container */}
+      <div className="flex-1 flex flex-col min-w-0 relative">
+        {/* Floating Mobile Menu Button */}
+        <button
+          className="md:hidden absolute top-6 right-6 z-20 p-3 bg-white/80 backdrop-blur-md rounded-xl shadow-sm border border-slate-100 text-slate-600 hover:bg-white"
+          onClick={() => setIsMobileMenuOpen(true)}
+        >
+          <Menu size={20} />
+        </button>
+
+        {/* Dynamic Route Content Area */}
+        <main className="flex-1 p-6 lg:p-8 overflow-y-auto w-full pt-20 md:pt-8">
+          {children}
+        </main>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden"
+          >
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-72 h-full bg-white"
+            >
+              <SidebarContent isExpanded={true} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Developer Preview Controls */}
+      <DevRoleSwitcher />
+    </div>
+  );
+}
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
     <ApiStatusProvider>
       <AuthProvider>
-        <div className="min-h-screen flex bg-slate-50 font-sans text-slate-800">
-          {/* Desktop Sidebar */}
-          <motion.aside
-            className="hidden md:flex h-screen sticky top-0 shrink-0 z-30"
-            initial={{ width: 80 }}
-            animate={{ width: isSidebarExpanded ? 240 : 80 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            onMouseEnter={() => setIsSidebarExpanded(true)}
-            onMouseLeave={() => setIsSidebarExpanded(false)}
-          >
-            <SidebarContent isExpanded={isSidebarExpanded} />
-          </motion.aside>
-
-          {/* Main Container */}
-          <div className="flex-1 flex flex-col min-w-0 relative">
-            {/* Floating Mobile Menu Button */}
-            <button
-              className="md:hidden absolute top-6 right-6 z-20 p-3 bg-white/80 backdrop-blur-md rounded-xl shadow-sm border border-slate-100 text-slate-600 hover:bg-white"
-              onClick={() => setIsMobileMenuOpen(true)}
-            >
-              <Menu size={20} />
-            </button>
-
-            {/* Dynamic Route Content Area */}
-            <main className="flex-1 p-6 lg:p-8 overflow-y-auto w-full pt-20 md:pt-8">
-              {children}
-            </main>
-          </div>
-
-          {/* Mobile Menu Overlay */}
-          <AnimatePresence>
-            {isMobileMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden"
-              >
-                <motion.div
-                  initial={{ x: "-100%" }}
-                  animate={{ x: 0 }}
-                  exit={{ x: "-100%" }}
-                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-72 h-full bg-white"
-                >
-                  <SidebarContent isExpanded={true} />
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        <DashboardLayoutContent>{children}</DashboardLayoutContent>
       </AuthProvider>
     </ApiStatusProvider>
   );
