@@ -15,27 +15,107 @@ import {
   Check,
   Trash2,
   Search,
-  Inbox
+  Inbox,
+  XCircle,
+  Briefcase,
+  MapPin,
+  DollarSign,
+  Building2,
+  ArrowUpRight
 } from "lucide-react";
-import { apiService } from "@/lib/api-service";
+import { apiService, Job } from "@/lib/api-service";
+import { useAuth } from "@/app/hooks/useAuth";
 
 interface NotificationItem {
   id: number;
   user_id: number;
-  type: "interview" | "application" | "view" | "system";
+  type:
+    | "interview"
+    | "application"
+    | "view"
+    | "system"
+    | "new_application"
+    | "application_accepted"
+    | "application_rejected";
   message: string;
   read: boolean;
   created_at: string;
 }
+  const getTypeConfig = (type: string) => {
+    switch (type) {
+      case "interview":
+        return {
+          icon: Calendar,
+          label: "Interview Scheduled",
+          bgClass: "bg-slate-100 border-slate-200 text-slate-700",
+          dotClass: "bg-amber-500",
+          pingClass: "bg-amber-400",
+          labelClass: "text-amber-600",
+          isPriority: true,
+        };
+      case "application_accepted":
+        return {
+          icon: CheckCircle2,
+          label: "Application Accepted",
+          bgClass: "bg-slate-100 border-slate-200 text-slate-700",
+          dotClass: "bg-emerald-500",
+          pingClass: "bg-emerald-400",
+          labelClass: "text-emerald-600",
+          isPriority: true,
+        };
+      case "application":
+      case "new_application":
+        return {
+          icon: FileText,
+          label: "New Application",
+          bgClass: "bg-slate-100 border-slate-200 text-slate-700",
+          dotClass: "bg-indigo-500",
+          pingClass: "bg-indigo-400",
+          labelClass: "text-indigo-600",
+        };
+      case "view":
+        return {
+          icon: Eye,
+          label: "Profile View",
+          bgClass: "bg-slate-100 border-slate-200 text-slate-700",
+          dotClass: "bg-violet-500",
+          pingClass: "bg-violet-400",
+          labelClass: "text-violet-600",
+        };
+      case "application_rejected":
+        return {
+          icon: XCircle,
+          label: "Application Declined",
+          bgClass: "bg-slate-100 border-slate-200 text-slate-700",
+          dotClass: "bg-rose-500",
+          pingClass: "bg-rose-400",
+          labelClass: "text-rose-600",
+        };
+      case "system":
+      default:
+        return {
+          icon: AlertTriangle,
+          label: "System Alert",
+          bgClass: "bg-slate-100 border-slate-200 text-slate-700",
+          dotClass: "bg-rose-500",
+          pingClass: "bg-rose-400",
+          labelClass: "text-rose-600",
+          isPriority: type === "system",
+        };
+    }
+  };
 
 export default function NotificationsPage() {
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [readIds, setReadIds] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const [activeTab, setActiveTab] = useState<"all" | "unread" | "read">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "unread" | "read" | "priority">("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "week" | "month">("all");
+  const [recommendedJobs, setRecommendedJobs] = useState<Job[]>([]);
 
   const loadNotifications = async (showRefreshedToast = false) => {
     setIsRefreshing(showRefreshedToast);
@@ -49,6 +129,23 @@ export default function NotificationsPage() {
       if (typeof window !== "undefined") {
         const storedRead = JSON.parse(localStorage.getItem("read_notification_ids") || "[]");
         setReadIds(storedRead.map(Number));
+      }
+
+      // Fetch Applications and Jobs for Smart Recommendations
+      const appRes = await apiService.applications.getMyApplications();
+      const jobRes = await apiService.jobs.getJobs();
+      if (jobRes && jobRes.jobs) {
+        const seekerSkills = (user as any)?.skills?.toLowerCase() || "";
+        const matches = jobRes.jobs.filter((job) => {
+          const alreadyApplied = appRes?.applications?.some((a) => a.job_id === job.id);
+          if (alreadyApplied) return false;
+
+          const titleMatch = seekerSkills.includes(job.title.toLowerCase());
+          const industryMatch = seekerSkills.includes(job.industry.toLowerCase());
+          const descMatch = job.description.toLowerCase().split(" ").some((word: string) => seekerSkills.includes(word));
+          return titleMatch || industryMatch || descMatch;
+        });
+        setRecommendedJobs(matches.length > 0 ? matches.slice(0, 2) : jobRes.jobs.slice(0, 2));
       }
       
       if (showRefreshedToast) {
@@ -65,7 +162,24 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     loadNotifications();
-  }, []);
+  }, [user]);
+
+  // Quick Apply to matches
+  const handleQuickApply = async (jobId: number) => {
+    try {
+      const applyRes = await apiService.applications.apply(
+        jobId,
+        "I am applying quickly using my pre-configured HireLink developer profile. Please review my skills and experience detailed on my resume.",
+      );
+      if (applyRes && applyRes.application) {
+        setRecommendedJobs((prev) => prev.filter((j) => j.id !== jobId));
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+      }
+    } catch (err) {
+      console.error("Quick apply failed:", err);
+    }
+  };
 
   // Compute read / unread values based on mock/remote read status + local storage cache overrides
   const processedNotifications = useMemo(() => {
@@ -84,22 +198,57 @@ export default function NotificationsPage() {
     return processedNotifications.filter((n) => n.read).length;
   }, [processedNotifications]);
 
-  // Tab and search filters
+  const priorityCount = useMemo(() => {
+    return processedNotifications.filter((n) => !!getTypeConfig(n.type).isPriority).length;
+  }, [processedNotifications]);
+
+  // Tab, search, and date filters
   const filteredNotifications = useMemo(() => {
     return processedNotifications.filter((n) => {
       const matchesTab =
         activeTab === "all" ||
         (activeTab === "unread" && !n.read) ||
-        (activeTab === "read" && n.read);
+        (activeTab === "read" && n.read) ||
+        (activeTab === "priority" && !!getTypeConfig(n.type).isPriority);
 
       const matchesSearch =
         searchTerm === "" ||
         n.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
         n.type.toLowerCase().includes(searchTerm.toLowerCase());
 
-      return matchesTab && matchesSearch;
+      let matchesDate = true;
+      if (dateFilter !== "all") {
+        const notifDate = new Date(n.created_at);
+        const now = new Date();
+        const diffTime = Math.abs(now.getTime() - notifDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (dateFilter === "today") {
+          matchesDate = diffDays <= 1;
+        } else if (dateFilter === "week") {
+          matchesDate = diffDays <= 7;
+        } else if (dateFilter === "month") {
+          matchesDate = diffDays <= 30;
+        }
+      }
+
+      return matchesTab && matchesSearch && matchesDate;
     });
-  }, [processedNotifications, activeTab, searchTerm]);
+
+    // Sort: Unread Priority first, then by date descending
+    return filtered.sort((a, b) => {
+      const aConfig = getTypeConfig(a.type);
+      const bConfig = getTypeConfig(b.type);
+      
+      const aIsUnreadPriority = !a.read && aConfig.isPriority;
+      const bIsUnreadPriority = !b.read && bConfig.isPriority;
+      
+      if (aIsUnreadPriority && !bIsUnreadPriority) return -1;
+      if (!aIsUnreadPriority && bIsUnreadPriority) return 1;
+      
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  }, [processedNotifications, activeTab, searchTerm, dateFilter]);
 
   // Mark an individual alert as read
   const markAsRead = (id: number) => {
@@ -108,6 +257,7 @@ export default function NotificationsPage() {
     setReadIds(updated);
     if (typeof window !== "undefined") {
       localStorage.setItem("read_notification_ids", JSON.stringify(updated));
+      window.dispatchEvent(new Event('notificationsUpdated'));
     }
   };
 
@@ -117,6 +267,7 @@ export default function NotificationsPage() {
     setReadIds(allIds);
     if (typeof window !== "undefined") {
       localStorage.setItem("read_notification_ids", JSON.stringify(allIds));
+      window.dispatchEvent(new Event('notificationsUpdated'));
     }
   };
 
@@ -127,40 +278,12 @@ export default function NotificationsPage() {
       setReadIds([]);
       if (typeof window !== "undefined") {
         localStorage.setItem("read_notification_ids", JSON.stringify([]));
+        window.dispatchEvent(new Event('notificationsUpdated'));
       }
     }
   };
 
-  // Maps icons and styled container parameters by type
-  const getTypeConfig = (type: string) => {
-    switch (type) {
-      case "interview":
-        return {
-          icon: Calendar,
-          bgClass: "bg-amber-50 border-amber-100 text-amber-600",
-          badgeBg: "from-amber-500 to-orange-500 text-white shadow-amber-100",
-        };
-      case "application":
-        return {
-          icon: FileText,
-          bgClass: "bg-emerald-50 border-emerald-100 text-emerald-600",
-          badgeBg: "from-emerald-500 to-indigo-500 text-white shadow-emerald-100",
-        };
-      case "view":
-        return {
-          icon: Eye,
-          bgClass: "bg-violet-50 border-violet-100 text-violet-600",
-          badgeBg: "from-violet-500 to-fuchsia-500 text-white shadow-violet-100",
-        };
-      case "system":
-      default:
-        return {
-          icon: AlertTriangle,
-          bgClass: "bg-rose-50 border-rose-100 text-rose-600",
-          badgeBg: "from-rose-500 to-red-500 text-white shadow-rose-100",
-        };
-    }
-  };
+
 
   // Helper for human-readable relative time
   const getRelativeTime = (dateStr: string) => {
@@ -242,8 +365,8 @@ export default function NotificationsPage() {
         <div className="flex flex-col md:flex-row gap-4 mb-6 items-center justify-between bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
           {/* Tabs */}
           <div className="flex items-center gap-1.5 self-start md:self-auto overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
-            {(["all", "unread", "read"] as const).map((tab) => {
-              const count = tab === "all" ? notifications.length : tab === "unread" ? unreadCount : readCount;
+            {(["all", "unread", "read", "priority"] as const).map((tab) => {
+              const count = tab === "all" ? notifications.length : tab === "unread" ? unreadCount : tab === "read" ? readCount : priorityCount;
               return (
                 <button
                   key={tab}
@@ -267,24 +390,39 @@ export default function NotificationsPage() {
             })}
           </div>
 
-          {/* Quick Filter Search */}
-          <div className="relative w-full md:w-80 shrink-0">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-              <Search size={18} />
-            </span>
-            <input
-              type="text"
-              placeholder="Search notifications..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 hover:border-slate-200 focus:border-indigo-500 focus:bg-white text-slate-900 rounded-xl text-sm font-medium transition-all outline-none"
-            />
+          {/* Quick Filter Search, and Date */}
+          <div className="flex items-center gap-2 w-full md:w-auto shrink-0 flex-wrap md:flex-nowrap">
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value as any)}
+              className="px-3 py-2 bg-slate-50 border border-slate-100 hover:border-slate-200 focus:border-indigo-500 focus:bg-white text-slate-700 rounded-xl text-sm font-medium transition-all outline-none cursor-pointer"
+            >
+              <option value="all">All Time</option>
+              <option value="today">Today</option>
+              <option value="week">Past Week</option>
+              <option value="month">Past Month</option>
+            </select>
+            
+            <div className="relative w-full md:w-56 shrink-0 mt-2 md:mt-0">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                <Search size={18} />
+              </span>
+              <input
+                type="text"
+                placeholder="Search alerts..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 hover:border-slate-200 focus:border-indigo-500 focus:bg-white text-slate-900 rounded-xl text-sm font-medium transition-all outline-none"
+              />
+            </div>
           </div>
         </div>
       )}
 
       {/* Main Board area */}
-      <div className="flex-grow max-w-4xl mx-auto w-full">
+      <div className="flex-grow w-full grid grid-cols-1 lg:grid-cols-3 gap-8 items-start pb-12">
+        {/* Left Column: Notifications Feed */}
+        <div className="lg:col-span-2 flex flex-col min-w-0">
         {isLoading ? (
           /* Loading skeletons */
           <div className="space-y-4">
@@ -372,6 +510,7 @@ export default function NotificationsPage() {
               onClick={() => {
                 setSearchTerm("");
                 setActiveTab("all");
+                setDateFilter("all");
               }}
               className="text-xs font-bold text-indigo-600 hover:text-indigo-700 uppercase tracking-wider"
             >
@@ -396,14 +535,14 @@ export default function NotificationsPage() {
                 >
                   {/* Read dot indicator */}
                   {!notif.read && (
-                    <span className="absolute top-1/2 left-3 -translate-y-1/2 flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                    <span className="absolute top-3 left-2 flex h-2 w-2 z-10">
+                      <span className={` absolute inline-flex h-full w-full rounded-full ${config.pingClass || "bg-indigo-400"} opacity-75`}></span>
+                      <span className={`relative inline-flex rounded-full h-2 w-2 ${config.dotClass || "bg-indigo-500"}`}></span>
                     </span>
                   )}
 
                   {/* Left Icon with tailored colors */}
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${
+                  <div className={`relative w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${
                     !notif.read ? "scale-105 transition-transform" : ""
                   } ${config.bgClass}`}>
                     <IconComp size={20} strokeWidth={2.2} />
@@ -412,9 +551,14 @@ export default function NotificationsPage() {
                   {/* Middle Text Details */}
                   <div className="flex-grow min-w-0 pl-1">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-xs uppercase tracking-wider font-extrabold text-slate-400">
-                        {notif.type}
+                      <span className={`text-xs uppercase tracking-wider font-extrabold ${config.labelClass || "text-indigo-500"}`}>
+                        {config.label}
                       </span>
+                      {config.isPriority && (
+                        <span className="bg-rose-100 text-rose-600 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest flex items-center">
+                          Priority
+                        </span>
+                      )}
                     </div>
                     <p className={`text-slate-700 text-sm leading-relaxed ${
                       !notif.read ? "font-semibold text-slate-900" : "font-medium"
@@ -432,6 +576,76 @@ export default function NotificationsPage() {
             })}
           </div>
         )}
+        </div>
+
+        {/* Right Column: Recommended Jobs */}
+        <div className="lg:col-span-1 flex flex-col gap-6 sticky top-6 hidden lg:flex">
+          <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                <Briefcase size={18} className="text-indigo-600" />
+                Recommended Jobs
+              </h3>
+            </div>
+            
+            <div className="space-y-4">
+              {recommendedJobs.length === 0 ? (
+                <div className="py-8 text-center text-slate-400 text-xs font-semibold">
+                  All matches successfully applied for! Check back tomorrow.
+                </div>
+              ) : (
+                recommendedJobs.map((job) => (
+                  <Link key={job.id} href={`/dashboard/jobs/${job.id}`} className="p-4 rounded-xl border border-slate-100 hover:border-slate-200/80 transition-all bg-slate-50/10 flex flex-col justify-between hover:shadow-sm">
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-extrabold tracking-widest text-indigo-600 uppercase">
+                          {job.industry}
+                        </span>
+                        <h3 className="text-sm font-extrabold text-slate-900 tracking-tight leading-tight">
+                          {job.title}
+                        </h3>
+                        <p className="text-xs text-slate-500 font-semibold flex items-center gap-1">
+                          <Building2 size={13} className="text-slate-400" />
+                          {job.employer_name}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1.5">
+                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600 flex items-center gap-0.5">
+                          <MapPin size={10} />
+                          {job.location}
+                        </span>
+                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-600 uppercase">
+                          {job.job_type}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 flex items-center justify-between border-t border-slate-50 mt-4">
+                      <span className="text-xs font-bold text-emerald-600">
+                        {job.salary || "Competitive"}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleQuickApply(job.id);
+                        }}
+                        className="flex items-center gap-1 py-1.5 px-3 rounded-lg bg-indigo-600 text-white text-[10px] font-black tracking-wider uppercase hover:bg-indigo-700 transition-colors shrink-0 shadow-sm"
+                      >
+                        Quick Apply
+                        <ArrowUpRight size={12} />
+                      </button>
+                    </div>
+                  </Link>
+                ))
+              )}
+            </div>
+            
+            <Link href="/dashboard/jobs" className="block text-center w-full mt-5 py-2.5 bg-slate-50 hover:bg-slate-100 text-indigo-600 text-sm font-bold rounded-xl transition-colors border border-slate-100">
+              Explore More Listings
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

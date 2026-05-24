@@ -20,6 +20,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ApplicationTracker from "@/components/dashboard/ApplicationTracker";
 
 export default function JobDetailPage() {
   const params = useParams();
@@ -249,73 +250,7 @@ export default function JobDetailPage() {
                 </div>
 
                 {/* Candidate review progress timeline */}
-                <div className="pt-2 px-2">
-                  <div className="flex justify-between items-center relative">
-                    
-                    {/* Connector progress line */}
-                    <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-[3px] bg-slate-100 z-0">
-                      <div
-                        className="h-full bg-indigo-500 rounded-full transition-all duration-500"
-                        style={{
-                          width:
-                            existingApplication.status === "accepted"
-                              ? "66%"
-                              : existingApplication.status === "rejected"
-                              ? "100%"
-                              : "25%",
-                        }}
-                      />
-                    </div>
-
-                    {/* Progress Nodes */}
-                    {[
-                      { key: "applied", label: "Applied" },
-                      { key: "review", label: "Under Review" },
-                      { key: "interview", label: "Interview" },
-                      { key: "decision", label: "Decision" }
-                    ].map((step, idx) => {
-                      const isFinished =
-                        existingApplication.status === "accepted"
-                          ? idx <= 2
-                          : existingApplication.status === "rejected"
-                          ? idx <= 3
-                          : idx === 0;
-
-                      const isRejectedNode = existingApplication.status === "rejected" && idx === 3;
-
-                      return (
-                        <div key={step.label} className="flex flex-col items-center z-10">
-                          <div
-                            className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs shadow-sm transition-all ${
-                              isRejectedNode
-                                ? "bg-rose-500 text-white border-2 border-rose-600"
-                                : isFinished
-                                ? "bg-indigo-600 text-white border-2 border-indigo-700"
-                                : "bg-white text-slate-300 border-2 border-slate-100"
-                            }`}
-                          >
-                            {isFinished ? (
-                              isRejectedNode ? (
-                                <XCircle size={13} />
-                              ) : (
-                                <CheckCircle2 size={13} />
-                              )
-                            ) : (
-                              idx + 1
-                            )}
-                          </div>
-                          <span
-                            className={`text-[9px] font-bold mt-1.5 ${
-                              isFinished ? "text-indigo-600 font-extrabold" : "text-slate-400"
-                            }`}
-                          >
-                            {step.label}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                <ApplicationTracker status={existingApplication.status as any} className="px-2" />
 
                 {/* Dynamic Status message details */}
                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-xs font-semibold text-slate-500 leading-relaxed">
@@ -448,12 +383,12 @@ export default function JobDetailPage() {
             </div>
           </div>
 
-          {/* Match Alert Sidebar Badge */}
+          {/* Company Highlights Badge */}
           <div className="p-6 bg-slate-900 rounded-xl text-white shadow-lg space-y-3 relative overflow-hidden">
             <div className="absolute right-0 bottom-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-indigo-400">Ambition Match</h3>
+            <h3 className="text-xs font-black uppercase tracking-wider text-indigo-400">About {companyName}</h3>
             <p className="text-[11px] text-slate-300 font-semibold leading-relaxed">
-              Google DeepMind analytics indicates that your React/Next.js experience matches 92% of Stripe requirements for Frontend Engineers!
+              <strong className="text-white">{companyName}</strong> is actively recruiting for the <strong className="text-white">{job.title}</strong> position in the {job.industry} sector. Submit your application before the deadline to be considered for this opportunity!
             </p>
           </div>
         </div>

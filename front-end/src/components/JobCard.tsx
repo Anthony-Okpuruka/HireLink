@@ -139,15 +139,15 @@ export default function JobCard({
         </div>
 
         {/* Location & Salary inline */}
-        <div className="flex items-center gap-3 text-sm text-slate-500 mb-4 font-medium">
-          <div className="flex items-center gap-1.5">
-            <MapPin size={15} strokeWidth={2.5} className="text-slate-400" />
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-slate-500 mb-4 font-medium">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <MapPin size={15} strokeWidth={2.5} className="text-slate-400 shrink-0" />
             <span className="truncate max-w-[120px]">{location}</span>
           </div>
-          <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-          <div className="flex items-center gap-1.5 text-slate-700">
-            <DollarSign size={15} strokeWidth={2.5} className="text-emerald-500" />
-            {salary || "Competitive"}
+          <span className="w-1 h-1 bg-slate-300 rounded-full shrink-0 hidden sm:block"></span>
+          <div className="flex items-center gap-1.5 text-slate-700 min-w-0">
+            <DollarSign size={15} strokeWidth={2.5} className="text-emerald-500 shrink-0" />
+            <span className="truncate">{salary || "Competitive"}</span>
           </div>
         </div>
 
@@ -155,8 +155,8 @@ export default function JobCard({
         <p className="text-slate-600 text-sm mb-6 line-clamp-2 leading-relaxed flex-grow">{description}</p>
 
         {/* Footer info (Tags & Time) */}
-        <div className="flex items-center justify-between mt-auto pt-5 border-t border-slate-50">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between mt-auto pt-5 border-t border-slate-50 gap-2 flex-wrap sm:flex-nowrap">
+          <div className="flex items-center gap-2 min-w-0">
             <span className="bg-slate-100 text-slate-600 text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-md font-bold">
               {displayType.split('•')[0].trim()}
             </span>

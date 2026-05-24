@@ -226,10 +226,10 @@ function JobsPageContent() {
             />
           </div>
 
-          <div className="flex gap-3 shrink-0">
+          <div className="flex flex-wrap md:flex-nowrap gap-3 shrink-0 w-full md:w-auto mt-2 md:mt-0">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`px-5 py-3 rounded-lg flex items-center gap-2 text-sm font-semibold transition ${
+              className={`flex-1 justify-center px-5 py-3 rounded-lg flex items-center gap-2 text-sm font-semibold transition ${
                 showFilters
                   ? "bg-slate-200 text-slate-800"
                   : "bg-slate-50 text-slate-600 hover:bg-slate-100"
@@ -244,7 +244,7 @@ function JobsPageContent() {
               )}
             </button>
 
-            <button className="bg-slate-900 text-white px-6 py-3 rounded-lg flex items-center gap-2 text-sm font-black hover:bg-slate-800 transition shadow-sm shrink-0">
+            <button className="flex-1 justify-center bg-slate-900 text-white px-6 py-3 rounded-lg flex items-center gap-2 text-sm font-black hover:bg-slate-800 transition shadow-sm shrink-0">
               <Search size={16} />
               Search
             </button>
@@ -391,7 +391,7 @@ function JobsPageContent() {
             </button>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredJobs.map((job) => (
               <JobCard key={job.id} {...job} />
             ))}
