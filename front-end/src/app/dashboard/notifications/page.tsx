@@ -549,7 +549,7 @@ export default function NotificationsPage() {
                   </div>
 
                   {/* Middle Text Details */}
-                  <div className="flex-grow min-w-0 pl-1">
+                  <div className="grow min-w-0 pl-1">
                     <div className="flex items-center gap-2 mb-0.5">
                       <span className={`text-xs uppercase tracking-wider font-extrabold ${config.labelClass || "text-indigo-500"}`}>
                         {config.label}
