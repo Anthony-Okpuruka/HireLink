@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { Search, Briefcase, MapPin, Filter, X } from "lucide-react";
 import JobCard from "@/components/JobCard";
 import { apiService, Job } from "@/lib/api-service";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 function JobsPageContent() {
   const searchParams = useSearchParams();
@@ -192,14 +193,7 @@ function JobsPageContent() {
     <div className="w-full text-slate-800 font-sans pb-16">
       
       {/* Title Segment */}
-      <div className="mb-8 text-left max-w-2xl mt-2 space-y-2">
-        <p className="text-2xl font-light text-slate-800 tracking-tight leading-snug">
-          Discover opportunities that <span className="font-extrabold text-indigo-600">match your ambition</span>.
-        </p>
-        <p className="text-slate-500 text-sm">
-          Browse thousands of tailored job postings and find the perfect role for your next career move.
-        </p>
-      </div>
+      <DashboardHeader icon={<Search/>} title="Jobs" subtitle={<>Discover opportunities that <span className="font-extrabold text-indigo-600">match your ambition</span>.</>} description={<>Browse thousands of tailored job postings and find the perfect role for your next career move.</>}/>
 
       {/* Header Search Section */}
       <section className="pb-8 pt-2">

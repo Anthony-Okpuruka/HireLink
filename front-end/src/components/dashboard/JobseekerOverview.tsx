@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/app/hooks/useAuth";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { DashboardTallyCard } from "@/components/dashboard/DashboardTallyCard";
 import { apiService, Job, Application } from "@/lib/api-service";
 import { mockActivityLogs, ActivityLog } from "@/lib/mock-data";
 import {
@@ -39,8 +41,12 @@ export default function JobseekerOverview() {
       try {
         const notifRes = await apiService.notifications.getAllNotifications();
         if (notifRes && notifRes.notifications) {
-          const storedRead = JSON.parse(localStorage.getItem("read_notification_ids") || "[]").map(Number);
-          const unread = notifRes.notifications.filter((n: any) => !n.read && !storedRead.includes(Number(n.id))).length;
+          const storedRead = JSON.parse(
+            localStorage.getItem("read_notification_ids") || "[]",
+          ).map(Number);
+          const unread = notifRes.notifications.filter(
+            (n: any) => !n.read && !storedRead.includes(Number(n.id)),
+          ).length;
           setUnreadCount(unread);
         }
       } catch (err) {
@@ -100,9 +106,9 @@ export default function JobseekerOverview() {
 
     loadDashboardData();
 
-    window.addEventListener('notificationsUpdated', fetchUnreadCount);
+    window.addEventListener("notificationsUpdated", fetchUnreadCount);
     return () => {
-      window.removeEventListener('notificationsUpdated', fetchUnreadCount);
+      window.removeEventListener("notificationsUpdated", fetchUnreadCount);
     };
   }, [user]);
 
@@ -220,11 +226,15 @@ export default function JobseekerOverview() {
             Welcome back, {user?.name || "Job Seeker"}!
           </h1>
           <p className="text-slate-300 text-sm max-w-xl font-medium">
-            Your profile looks amazing! Keep applying to achieve your career goals.
+            Your profile looks amazing! Keep applying to achieve your career
+            goals.
           </p>
         </div>
         <div className="z-10 relative group">
-          <Link href="/dashboard/notifications" className="p-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl flex items-center justify-center transition-all cursor-pointer">
+          <Link
+            href="/dashboard/notifications"
+            className="p-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl flex items-center justify-center transition-all cursor-pointer"
+          >
             <Bell size={24} className="text-indigo-100" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
@@ -235,7 +245,7 @@ export default function JobseekerOverview() {
           </Link>
           {unreadCount > 0 && (
             <div className="absolute top-full right-0 mt-3 whitespace-nowrap bg-white text-slate-800 border border-slate-100 shadow-xl text-xs font-bold py-2 px-3.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
-              {unreadCount} unread message{unreadCount !== 1 ? 's' : ''}
+              {unreadCount} unread message{unreadCount !== 1 ? "s" : ""}
             </div>
           )}
         </div>
@@ -243,35 +253,17 @@ export default function JobseekerOverview() {
 
       {/* Statistics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {stats.map((stat, idx) => {
-          const Icon = stat.icon;
-          return (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.05 }}
-              className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-start gap-4 group"
-            >
-              <div
-                className={`p-3.5 rounded-lg shrink-0 transition-transform group-hover:scale-105 ${stat.color}`}
-              >
-                <Icon size={20} />
-              </div>
-              <div className="space-y-1">
-                <span className="text-2xl font-black tracking-tight text-slate-900">
-                  {stat.value}
-                </span>
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  {stat.label}
-                </h3>
-                <p className="text-[10px] font-medium text-slate-400 leading-none pt-0.5">
-                  {stat.description}
-                </p>
-              </div>
-            </motion.div>
-          );
-        })}
+        {stats.map((stat, idx) => (
+          <DashboardTallyCard
+            key={stat.label}
+            label={stat.label}
+            value={stat.value}
+            icon={<stat.icon size={20} />}
+            colorClass={stat.color}
+            description={stat.description}
+            delay={idx * 0.05}
+          />
+        ))}
       </div>
 
       {/* Main Core Dashboard Content Sections */}
@@ -469,13 +461,22 @@ export default function JobseekerOverview() {
               <AnimatePresence>
                 {activities.map((act) => {
                   let dotColor = "bg-slate-400 border-slate-200";
-                  if (act.type === "interview" || act.type === "application_accepted")
+                  if (
+                    act.type === "interview" ||
+                    act.type === "application_accepted"
+                  )
                     dotColor = "bg-emerald-500 border-emerald-100";
-                  if (act.type === "application" || act.type === "new_application")
+                  if (
+                    act.type === "application" ||
+                    act.type === "new_application"
+                  )
                     dotColor = "bg-indigo-500 border-indigo-100";
                   if (act.type === "view")
                     dotColor = "bg-amber-500 border-amber-100";
-                  if (act.type === "application_rejected" || act.type === "system")
+                  if (
+                    act.type === "application_rejected" ||
+                    act.type === "system"
+                  )
                     dotColor = "bg-rose-500 border-rose-100";
 
                   return (
@@ -510,7 +511,8 @@ export default function JobseekerOverview() {
               Need Assistance?
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-              Have any questions or encountered an issue? Drop our support team a direct email, and we will get back to you as soon as possible.
+              Have any questions or encountered an issue? Drop our support team
+              a direct email, and we will get back to you as soon as possible.
             </p>
             <a
               href="mailto:support@hirelink.com?subject=HireLink%20Jobseeker%20Support%20Request"

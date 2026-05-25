@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { apiService, Job } from "@/lib/api-service";
 import { useAuth } from "@/app/hooks/useAuth";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 interface NotificationItem {
   id: number;
@@ -323,42 +324,38 @@ export default function NotificationsPage() {
       </AnimatePresence>
 
       {/* Header section with page title */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-        <div className="text-left max-w-2xl mt-2">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5 mb-2">
-            <Bell className="text-indigo-600" size={28} />
-            Notifications
-          </h1>
-          <p className="text-lg font-light text-slate-800 tracking-tight leading-snug">
+      <DashboardHeader
+        icon={<Bell className="text-indigo-600" size={28} />}
+        title="Notifications"
+        subtitle={
+          <>
             Stay connected and <span className="font-semibold text-rose-600">never miss a beat</span>.
-          </p>
-          <p className="text-slate-500 mt-1 text-sm">
-            View your recent alerts, application updates, and matching recommendations.
-          </p>
-        </div>
-
-        {/* Global Toolbar Buttons */}
-        {notifications.length > 0 && (
-          <div className="flex items-center gap-3 self-start md:self-auto">
-            {unreadCount > 0 && (
+          </>
+        }
+        description="View your recent alerts, application updates, and matching recommendations."
+        action={
+          notifications.length > 0 && (
+            <div className="flex items-center gap-3 self-start md:self-auto">
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  className="flex items-center gap-1.5 text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100/70 border border-indigo-100/50 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 duration-200"
+                >
+                  <Check size={14} strokeWidth={2.5} />
+                  Mark all read
+                </button>
+              )}
               <button
-                onClick={markAllAsRead}
-                className="flex items-center gap-1.5 text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100/70 border border-indigo-100/50 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 duration-200"
+                onClick={clearAllNotifications}
+                className="flex items-center gap-1.5 text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100/70 border border-rose-100/50 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 duration-200"
               >
-                <Check size={14} strokeWidth={2.5} />
-                Mark all read
+                <Trash2 size={14} />
+                Clear All
               </button>
-            )}
-            <button
-              onClick={clearAllNotifications}
-              className="flex items-center gap-1.5 text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100/70 border border-rose-100/50 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 duration-200"
-            >
-              <Trash2 size={14} />
-              Clear All
-            </button>
-          </div>
-        )}
-      </div>
+            </div>
+          )
+        }
+      />
 
       {/* Toolbar Filters Panel (only shown when there are alerts) */}
       {notifications.length > 0 && !isLoading && (
@@ -576,75 +573,6 @@ export default function NotificationsPage() {
             })}
           </div>
         )}
-        </div>
-
-        {/* Right Column: Recommended Jobs */}
-        <div className="lg:col-span-1 flex flex-col gap-6 sticky top-6 hidden lg:flex">
-          <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-bold text-slate-900 flex items-center gap-2">
-                <Briefcase size={18} className="text-indigo-600" />
-                Recommended Jobs
-              </h3>
-            </div>
-            
-            <div className="space-y-4">
-              {recommendedJobs.length === 0 ? (
-                <div className="py-8 text-center text-slate-400 text-xs font-semibold">
-                  All matches successfully applied for! Check back tomorrow.
-                </div>
-              ) : (
-                recommendedJobs.map((job) => (
-                  <Link key={job.id} href={`/dashboard/jobs/${job.id}`} className="p-4 rounded-xl border border-slate-100 hover:border-slate-200/80 transition-all bg-slate-50/10 flex flex-col justify-between hover:shadow-sm">
-                    <div className="space-y-3">
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-extrabold tracking-widest text-indigo-600 uppercase">
-                          {job.industry}
-                        </span>
-                        <h3 className="text-sm font-extrabold text-slate-900 tracking-tight leading-tight">
-                          {job.title}
-                        </h3>
-                        <p className="text-xs text-slate-500 font-semibold flex items-center gap-1">
-                          <Building2 size={13} className="text-slate-400" />
-                          {job.employer_name}
-                        </p>
-                      </div>
-
-                      <div className="flex flex-wrap gap-1.5">
-                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600 flex items-center gap-0.5">
-                          <MapPin size={10} />
-                          {job.location}
-                        </span>
-                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-600 uppercase">
-                          {job.job_type}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="pt-4 flex items-center justify-between border-t border-slate-50 mt-4">
-                      <span className="text-xs font-bold text-emerald-600">
-                        {job.salary || "Competitive"}
-                      </span>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleQuickApply(job.id);
-                        }}
-                        className="flex items-center gap-1 py-1.5 px-3 rounded-lg bg-indigo-600 text-white text-[10px] font-black tracking-wider uppercase hover:bg-indigo-700 transition-colors shrink-0 shadow-sm"
-                      >
-                        Quick Apply
-                        <ArrowUpRight size={12} />
-                      </button>
-                    </div>
-                  </Link>
-                ))
-              )}
-            </div>
-            
-            <Link href="/dashboard/jobs" className="block text-center w-full mt-5 py-2.5 bg-slate-50 hover:bg-slate-100 text-indigo-600 text-sm font-bold rounded-xl transition-colors border border-slate-100">
-              Explore More Listings
-            </Link>
-          </div>
         </div>
       </div>
     </div>
