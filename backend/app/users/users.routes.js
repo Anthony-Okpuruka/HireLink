@@ -7,6 +7,7 @@ import {
   getUsers,
   deleteUser,
   getUserById,
+  getSystemMetrics,
 } from "./users.controller.js";
 import { protect, restrictTo } from "../core/middleware.js";
 import {
@@ -24,6 +25,7 @@ router.put("/me/password", protect, changePasswordValidator, changePassword);
 router.delete("/me", protect, deleteMe);
 
 // ─── Admin Routes ─────────────────────────────────────────────
+router.get("/admin/stats", protect, restrictTo("admin"), getSystemMetrics);
 router.get("/", protect, restrictTo("admin"), paginationQueryValidator, getUsers);
 router.delete("/:id", protect, restrictTo("admin"), deleteUser);
 

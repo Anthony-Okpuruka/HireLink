@@ -1,5 +1,18 @@
 import pool from "../core/db.js";
 
+// Get system-wide stats for admin dashboard
+export const getSystemStatsFromDB = async () => {
+  const usersResult = await pool.query(`SELECT COUNT(*)::int as total_users FROM users`);
+  const jobsResult = await pool.query(`SELECT COUNT(*)::int as active_jobs FROM jobs`);
+  const appsResult = await pool.query(`SELECT COUNT(*)::int as total_applications FROM applications`);
+
+  return {
+    totalUsers: usersResult.rows[0].total_users,
+    activeJobs: jobsResult.rows[0].active_jobs,
+    totalApplications: appsResult.rows[0].total_applications,
+  };
+};
+
 // ─── User Queries ───────────────────────────────────────────
 
 // Save a new user to the database
