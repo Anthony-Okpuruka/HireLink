@@ -4,6 +4,9 @@ import {
   mockApplications,
   mockUsers,
   mockActivityLogs,
+  mockJobseekerActivityLogs,
+  mockEmployerActivityLogs,
+  mockAdminActivityLogs,
   logApiFallback,
 } from "./mock-data";
 
@@ -579,53 +582,26 @@ export const apiService = {
         let userRole = "jobseeker";
         if (typeof window !== "undefined") {
           try {
-            const userStr = localStorage.getItem("user");
-            if (userStr) {
-              const userObj = JSON.parse(userStr);
-              if (userObj && userObj.role) {
-                userRole = userObj.role;
+            const devOverride = localStorage.getItem("roleOverride");
+            if (devOverride) {
+              userRole = devOverride;
+            } else {
+              const userStr = localStorage.getItem("user");
+              if (userStr) {
+                const userObj = JSON.parse(userStr);
+                if (userObj && userObj.role) {
+                  userRole = userObj.role;
+                }
               }
             }
           } catch {}
         }
 
-        let filteredLogs = mockActivityLogs;
+        let filteredLogs = mockJobseekerActivityLogs;
         if (userRole === "employer") {
-          filteredLogs = [
-            {
-              id: 1,
-              text: "A new applicant, Alex Rivera, applied for your listing 'Junior Frontend Engineer'",
-              timestamp: "2 hours ago",
-              type: "application",
-            },
-            {
-              id: 2,
-              text: "Your posting 'Product Designer' reached 45 active views today.",
-              timestamp: "1 day ago",
-              type: "view",
-            },
-            {
-              id: 3,
-              text: "System Health Alert: Backup database completed successfully.",
-              timestamp: "2 days ago",
-              type: "system",
-            },
-          ] as any;
+          filteredLogs = mockEmployerActivityLogs;
         } else if (userRole === "admin") {
-          filteredLogs = [
-            {
-              id: 1,
-              text: "System load spike warning: CPU reached 87%.",
-              timestamp: "5 mins ago",
-              type: "system",
-            },
-            {
-              id: 2,
-              text: "There are 5 pending employer profile approvals in the queue.",
-              timestamp: "2 hours ago",
-              type: "application",
-            },
-          ] as any;
+          filteredLogs = mockAdminActivityLogs;
         }
 
         const formatted = filteredLogs.map((log) => ({
@@ -657,53 +633,26 @@ export const apiService = {
         let userRole = "jobseeker";
         if (typeof window !== "undefined") {
           try {
-            const userStr = localStorage.getItem("user");
-            if (userStr) {
-              const userObj = JSON.parse(userStr);
-              if (userObj && userObj.role) {
-                userRole = userObj.role;
+            const devOverride = localStorage.getItem("roleOverride");
+            if (devOverride) {
+              userRole = devOverride;
+            } else {
+              const userStr = localStorage.getItem("user");
+              if (userStr) {
+                const userObj = JSON.parse(userStr);
+                if (userObj && userObj.role) {
+                  userRole = userObj.role;
+                }
               }
             }
           } catch {}
         }
 
-        let filteredLogs = mockActivityLogs;
+        let filteredLogs = mockJobseekerActivityLogs;
         if (userRole === "employer") {
-          filteredLogs = [
-            {
-              id: 1,
-              text: "A new applicant, Alex Rivera, applied for your listing 'Junior Frontend Engineer'",
-              timestamp: "2 hours ago",
-              type: "application",
-            },
-            {
-              id: 2,
-              text: "Your posting 'Product Designer' reached 45 active views today.",
-              timestamp: "1 day ago",
-              type: "view",
-            },
-            {
-              id: 3,
-              text: "System Health Alert: Backup database completed successfully.",
-              timestamp: "2 days ago",
-              type: "system",
-            },
-          ] as any;
+          filteredLogs = mockEmployerActivityLogs;
         } else if (userRole === "admin") {
-          filteredLogs = [
-            {
-              id: 1,
-              text: "System load spike warning: CPU reached 87%.",
-              timestamp: "5 mins ago",
-              type: "system",
-            },
-            {
-              id: 2,
-              text: "There are 5 pending employer profile approvals in the queue.",
-              timestamp: "2 hours ago",
-              type: "application",
-            },
-          ] as any;
+          filteredLogs = mockAdminActivityLogs;
         }
 
         const formatted = filteredLogs.map((log) => ({

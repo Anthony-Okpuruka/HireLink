@@ -25,7 +25,15 @@ export interface ActivityLog {
   id: number;
   text: string;
   timestamp: string;
-  type: "application" | "message" | "view" | "system" | "interview";
+  type:
+    | "application"
+    | "message"
+    | "view"
+    | "system"
+    | "interview"
+    | "new_application"
+    | "application_accepted"
+    | "application_rejected";
 }
 
 // ==========================================
@@ -217,7 +225,7 @@ export const mockStats: DashboardStats = {
   },
 };
 
-export const mockActivityLogs: ActivityLog[] = [
+export const mockJobseekerActivityLogs: ActivityLog[] = [
   {
     id: 1,
     text: "Stripe updated your application status to: Accepted / Interview Scheduled",
@@ -232,7 +240,7 @@ export const mockActivityLogs: ActivityLog[] = [
   },
   {
     id: 3,
-    text: "Google DeepMind reviewed your profile for AI Tools Internship",
+    text: "Google DeepMind reviewed your profile for AI Tools InternshipCenter",
     timestamp: "3 days ago",
     type: "view",
   },
@@ -242,7 +250,58 @@ export const mockActivityLogs: ActivityLog[] = [
     timestamp: "1 week ago",
     type: "system",
   },
+  {
+    id: 5,
+    text: "Your application for 'Junior Frontend Engineer' was accepted by Stripe.",
+    timestamp: "4 hours ago",
+    type: "application_accepted",
+  },
+  {
+    id: 6,
+    text: "Your application for 'Backend Intern' was not selected.",
+    timestamp: "5 days ago",
+    type: "application_rejected",
+  },
 ];
+
+export const mockEmployerActivityLogs: ActivityLog[] = [
+  {
+    id: 1,
+    text: "A new applicant, Alex Rivera, applied for your job posting 'Product Designer'.",
+    timestamp: "2 hours ago",
+    type: "new_application",
+  },
+  {
+    id: 2,
+    text: "Your posting 'Junior Frontend Engineer' reached 45 active views today.",
+    timestamp: "1 day ago",
+    type: "view",
+  },
+  {
+    id: 3,
+    text: "System Health Alert: Backup database completed successfully.",
+    timestamp: "2 days ago",
+    type: "system",
+  },
+];
+
+export const mockAdminActivityLogs: ActivityLog[] = [
+  {
+    id: 1,
+    text: "System load spike warning: CPU reached 87%.",
+    timestamp: "5 mins ago",
+    type: "system",
+  },
+  {
+    id: 2,
+    text: "There are 5 pending employer profile approvals in the queue.",
+    timestamp: "2 hours ago",
+    type: "application",
+  },
+];
+
+// Reusable backward compatibility
+export const mockActivityLogs = mockJobseekerActivityLogs;
 
 // Reusable Fallback Logger
 export function logApiFallback(endpoint: string, error?: any) {

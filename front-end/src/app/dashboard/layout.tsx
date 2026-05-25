@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -24,6 +24,7 @@ import { UserProfile } from "@/components/dashboard/UserProfile";
 import { ApiStatusBadge } from "@/components/dashboard/ApiStatusBadge";
 import { LogoutButton } from "@/components/dashboard/LogoutButton";
 import { DevRoleSwitcher } from "@/components/dashboard/DevRoleSwitcher";
+import { apiService } from "@/lib/api-service";
 
 interface NavItem {
   name: string;
@@ -45,8 +46,33 @@ function DashboardLayoutContent({
   const pathname = usePathname() || "/dashboard";
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      const fetchUnread = async () => {
+        try {
+          const response = await apiService.notifications.getAllNotifications();
+          if (response?.notifications) {
+            const storedRead = JSON.parse(localStorage.getItem("read_notification_ids") || "[]").map(Number);
+            const unread = response.notifications.filter((n: any) => !n.read && !storedRead.includes(Number(n.id))).length;
+            setUnreadCount(unread);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      };
+
+      fetchUnread();
+      
+      window.addEventListener('notificationsUpdated', fetchUnread);
+      return () => {
+        window.removeEventListener('notificationsUpdated', fetchUnread);
+      };
+    }
+  }, [user]);
 
   const getNavSections = (role?: string): NavSection[] => {
     if (role === "employer") {
@@ -261,14 +287,19 @@ function DashboardLayoutContent({
                         : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                     }`}
                   >
-                    <item.icon
-                      size={20}
-                      className={`transition-colors duration-200 shrink-0 ${
-                        isActive
-                          ? "text-indigo-600"
-                          : "text-slate-400 group-hover:text-slate-600"
-                      }`}
-                    />
+                    <div className="relative shrink-0">
+                      <item.icon
+                        size={20}
+                        className={`transition-colors duration-200 ${
+                          isActive
+                            ? "text-indigo-600"
+                            : "text-slate-400 group-hover:text-slate-600"
+                        }`}
+                      />
+                      {item.name === "Notifications" && unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full" />
+                      )}
+                    </div>
                     <span
                       className={`transition-all duration-300 ${
                         isExpanded

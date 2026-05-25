@@ -16,10 +16,13 @@ import {
   XCircle,
   Clock,
   CheckCircle2,
-  AlertCircle,
   ArrowUpRight,
+  Mail,
+  Bell,
 } from "lucide-react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import ApplicationTracker from "./ApplicationTracker";
 
 export default function JobseekerOverview() {
   const { user } = useAuth();
@@ -27,10 +30,24 @@ export default function JobseekerOverview() {
   const [recommendedJobs, setRecommendedJobs] = useState<Job[]>([]);
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [isWithdrawingId, setIsWithdrawingId] = useState<number | null>(null);
 
   // Load Dashboard Data
   useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const notifRes = await apiService.notifications.getAllNotifications();
+        if (notifRes && notifRes.notifications) {
+          const storedRead = JSON.parse(localStorage.getItem("read_notification_ids") || "[]").map(Number);
+          const unread = notifRes.notifications.filter((n: any) => !n.read && !storedRead.includes(Number(n.id))).length;
+          setUnreadCount(unread);
+        }
+      } catch (err) {
+        console.error("Failed to load notifications:", err);
+      }
+    };
+
     async function loadDashboardData() {
       setIsLoading(true);
       try {
@@ -71,6 +88,9 @@ export default function JobseekerOverview() {
 
         // Load activities
         setActivities(mockActivityLogs);
+
+        // Fetch Notifications
+        await fetchUnreadCount();
       } catch (err) {
         console.error("Failed to load seeker overview data:", err);
       } finally {
@@ -79,6 +99,11 @@ export default function JobseekerOverview() {
     }
 
     loadDashboardData();
+
+    window.addEventListener('notificationsUpdated', fetchUnreadCount);
+    return () => {
+      window.removeEventListener('notificationsUpdated', fetchUnreadCount);
+    };
   }, [user]);
 
   // Withdraw from job application
@@ -159,29 +184,29 @@ export default function JobseekerOverview() {
       label: "Applications Sent",
       value: totalApps,
       icon: FileText,
-      color: "text-indigo-600 bg-indigo-50",
+      color: "text-slate-700 bg-slate-100",
       description: "Active submissions",
     },
     {
       label: "Interviews Booked",
       value: interviewApps,
       icon: Calendar,
-      color: "text-emerald-600 bg-emerald-50",
+      color: "text-slate-700 bg-slate-100",
       description: "Awaiting your chat",
     },
     {
       label: "Pending Review",
       value: pendingApps,
       icon: Clock,
-      color: "text-amber-600 bg-amber-50",
+      color: "text-slate-700 bg-slate-100",
       description: "Under consideration",
     },
     {
-      label: "Profile Match Rate",
-      value: "88%",
-      icon: MapPin,
-      color: "text-violet-600 bg-violet-50",
-      description: "Based on your skills",
+      label: "Accepted",
+      value: interviewApps,
+      icon: CheckCircle2,
+      color: "text-slate-700 bg-slate-100",
+      description: "Approved by employers",
     },
   ];
 
@@ -195,20 +220,24 @@ export default function JobseekerOverview() {
             Welcome back, {user?.name || "Job Seeker"}!
           </h1>
           <p className="text-slate-300 text-sm max-w-xl font-medium">
-            Your profile looks amazing! Your match rate is in the top 10% for
-            frontend roles in your location. Keep applying to achieve your goal.
+            Your profile looks amazing! Keep applying to achieve your career goals.
           </p>
         </div>
-        <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-4 shrink-0 z-10">
-          <div className="text-xs font-bold text-slate-300 uppercase tracking-widest leading-none">
-            Profile Strength
-          </div>
-          <div className="flex items-center gap-3 mt-2">
-            <span className="text-2xl font-black">92%</span>
-            <div className="w-24 h-2.5 bg-white/20 rounded-full overflow-hidden">
-              <div className="h-full bg-indigo-400 rounded-full w-[92%]" />
+        <div className="z-10 relative group">
+          <Link href="/dashboard/notifications" className="p-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl flex items-center justify-center transition-all cursor-pointer">
+            <Bell size={24} className="text-indigo-100" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-rose-500 border-2 border-slate-900"></span>
+              </span>
+            )}
+          </Link>
+          {unreadCount > 0 && (
+            <div className="absolute top-full right-0 mt-3 whitespace-nowrap bg-white text-slate-800 border border-slate-100 shadow-xl text-xs font-bold py-2 px-3.5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+              {unreadCount} unread message{unreadCount !== 1 ? 's' : ''}
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -284,27 +313,6 @@ export default function JobseekerOverview() {
               ) : (
                 <div className="space-y-6">
                   {applications.map((app) => {
-                    const steps = [
-                      { key: "applied", label: "Applied", active: true },
-                      {
-                        key: "review",
-                        label: "Reviewing",
-                        active: app.status !== "applied" || true,
-                      },
-                      {
-                        key: "interview",
-                        label: "Interview",
-                        active: app.status === "accepted",
-                      },
-                      {
-                        key: "decision",
-                        label: "Decision",
-                        active:
-                          app.status === "accepted" ||
-                          app.status === "rejected",
-                      },
-                    ];
-
                     return (
                       <motion.div
                         key={app.id}
@@ -367,72 +375,7 @@ export default function JobseekerOverview() {
                         </div>
 
                         {/* Timeline Graphic Steps */}
-                        <div className="pt-2">
-                          <div className="flex justify-between items-center relative">
-                            {/* Connector Line */}
-                            <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-[3px] bg-slate-100 z-0">
-                              <div
-                                className={`h-full bg-indigo-500 rounded-full transition-all duration-500`}
-                                style={{
-                                  width:
-                                    app.status === "accepted"
-                                      ? "66%"
-                                      : app.status === "rejected"
-                                        ? "100%"
-                                        : "25%",
-                                }}
-                              />
-                            </div>
-
-                            {steps.map((step, stepIdx) => {
-                              const isFinished =
-                                app.status === "accepted"
-                                  ? stepIdx <= 2
-                                  : app.status === "rejected"
-                                    ? stepIdx <= 3
-                                    : stepIdx === 0;
-
-                              const isRejectedFinal =
-                                app.status === "rejected" && stepIdx === 3;
-
-                              return (
-                                <div
-                                  key={step.label}
-                                  className="flex flex-col items-center z-10"
-                                >
-                                  <div
-                                    className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs shadow-sm transition-all ${
-                                      isRejectedFinal
-                                        ? "bg-rose-500 text-white border-2 border-rose-600 scale-105"
-                                        : isFinished
-                                          ? "bg-indigo-600 text-white border-2 border-indigo-700"
-                                          : "bg-white text-slate-300 border-2 border-slate-100"
-                                    }`}
-                                  >
-                                    {isFinished ? (
-                                      isRejectedFinal ? (
-                                        <XCircle size={13} />
-                                      ) : (
-                                        <CheckCircle2 size={13} />
-                                      )
-                                    ) : (
-                                      stepIdx + 1
-                                    )}
-                                  </div>
-                                  <span
-                                    className={`text-[9px] font-bold mt-1.5 ${
-                                      isFinished
-                                        ? "text-indigo-600 font-extrabold"
-                                        : "text-slate-400"
-                                    }`}
-                                  >
-                                    {step.label}
-                                  </span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
+                        <ApplicationTracker status={app.status as any} />
                       </motion.div>
                     );
                   })}
@@ -526,12 +469,14 @@ export default function JobseekerOverview() {
               <AnimatePresence>
                 {activities.map((act) => {
                   let dotColor = "bg-slate-400 border-slate-200";
-                  if (act.type === "interview")
+                  if (act.type === "interview" || act.type === "application_accepted")
                     dotColor = "bg-emerald-500 border-emerald-100";
-                  if (act.type === "application")
+                  if (act.type === "application" || act.type === "new_application")
                     dotColor = "bg-indigo-500 border-indigo-100";
                   if (act.type === "view")
                     dotColor = "bg-amber-500 border-amber-100";
+                  if (act.type === "application_rejected" || act.type === "system")
+                    dotColor = "bg-rose-500 border-rose-100";
 
                   return (
                     <motion.div
@@ -565,14 +510,15 @@ export default function JobseekerOverview() {
               Need Assistance?
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed font-semibold">
-              Read our modern platform guidelines, view documentation resources,
-              or drop our technical admin support team a direct message in case
-              of questions.
+              Have any questions or encountered an issue? Drop our support team a direct email, and we will get back to you as soon as possible.
             </p>
-            <button className="w-full flex items-center justify-between py-2.5 px-4 bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg text-xs font-bold transition-all text-white">
-              Open Guideline Docs
-              <ChevronRight size={14} />
-            </button>
+            <a
+              href="mailto:support@hirelink.com?subject=HireLink%20Jobseeker%20Support%20Request"
+              className="w-full flex items-center justify-between py-2.5 px-4 bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg text-xs font-bold transition-all text-white"
+            >
+              <span>Send Support Email</span>
+              <Mail size={14} className="text-indigo-400" />
+            </a>
           </div>
         </div>
       </div>
