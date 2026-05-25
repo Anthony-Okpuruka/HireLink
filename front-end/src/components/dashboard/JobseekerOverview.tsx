@@ -29,6 +29,7 @@ import ApplicationTracker from "./ApplicationTracker";
 export default function JobseekerOverview() {
   const { user } = useAuth();
   const [statsData, setStatsData] = useState({ total: 0, applied: 0, accepted: 0, rejected: 0 });
+  const [applications, setApplications] = useState<Application[]>([]);
   const [recommendedJobs, setRecommendedJobs] = useState<Job[]>([]);
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
