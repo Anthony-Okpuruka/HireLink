@@ -95,7 +95,6 @@ const EmployerOverview: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
@@ -121,33 +120,22 @@ const EmployerOverview: React.FC = () => {
         </div>
       ) : (
         <>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             <div className="bg-white p-6 rounded-2xl shadow-sm border">
               <Briefcase className="text-blue-600" />
-              <p className="text-gray-500 text-sm mt-4">
-                Active Job Postings
-              </p>
-              <h2 className="text-3xl font-bold">
-                {stats.activeJobs}
-              </h2>
+              <p className="text-gray-500 text-sm mt-4">Active Job Postings</p>
+              <h2 className="text-3xl font-bold">{stats.activeJobs}</h2>
             </div>
 
             <div className="bg-white p-6 rounded-2xl shadow-sm border">
               <Users className="text-green-600" />
-              <p className="text-gray-500 text-sm mt-4">
-                Total Applicants
-              </p>
-              <h2 className="text-3xl font-bold">
-                {stats.totalApplicants}
-              </h2>
+              <p className="text-gray-500 text-sm mt-4">Total Applicants</p>
+              <h2 className="text-3xl font-bold">{stats.totalApplicants}</h2>
             </div>
 
             <div className="bg-white p-6 rounded-2xl shadow-sm border">
               <Bell className="text-yellow-600" />
-              <p className="text-gray-500 text-sm mt-4">
-                Unread Notifications
-              </p>
+              <p className="text-gray-500 text-sm mt-4">Unread Notifications</p>
               <h2 className="text-3xl font-bold">
                 {stats.unreadNotifications}
               </h2>
@@ -156,9 +144,7 @@ const EmployerOverview: React.FC = () => {
 
           <div className="bg-white p-6 rounded-2xl shadow-sm border">
             <div className="flex justify-between mb-4">
-              <h2 className="text-xl font-semibold">
-                Recent Applicants
-              </h2>
+              <h2 className="text-xl font-semibold">Recent Applicants</h2>
 
               <Link
                 href="/dashboard/applicants"
@@ -180,12 +166,8 @@ const EmployerOverview: React.FC = () => {
                     className="flex justify-between border p-4 rounded-xl hover:bg-gray-50"
                   >
                     <div>
-                      <p className="font-medium">
-                        {applicant.name}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {applicant.role}
-                      </p>
+                      <p className="font-medium">{applicant.name}</p>
+                      <p className="text-sm text-gray-500">{applicant.role}</p>
                     </div>
                     <p className="text-sm text-gray-400">
                       {applicant.appliedAt}

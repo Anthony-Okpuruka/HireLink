@@ -16,10 +16,15 @@ import {
   Briefcase,
   Users,
   ShieldAlert,
+  LayoutDashboard,
+  X,
+  LogOut,
+  CheckCircle2,
+  User,
+  UserCog,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ApiStatusProvider } from "@/app/providers/ApiStatusProvider";
-import { AuthProvider, useAuth } from "@/app/providers/AuthProvider";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { UserProfile } from "@/components/dashboard/UserProfile";
 import { ApiStatusBadge } from "@/components/dashboard/ApiStatusBadge";
 import { LogoutButton } from "@/components/dashboard/LogoutButton";
@@ -403,10 +408,6 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ApiStatusProvider>
-      <AuthProvider>
-        <DashboardLayoutContent>{children}</DashboardLayoutContent>
-      </AuthProvider>
-    </ApiStatusProvider>
+    <DashboardLayoutContent>{children}</DashboardLayoutContent>
   );
 }

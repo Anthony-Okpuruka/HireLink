@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import JobCard from "@/components/JobCard";
 import { apiService, Job } from "@/lib/api-service";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 export default function SavedJobsPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -102,31 +103,27 @@ export default function SavedJobsPage() {
   return (
     <div className="w-full min-h-[80vh] flex flex-col">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-        <div className="text-left max-w-2xl mt-2">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2 mb-2">
-            <Bookmark className="text-indigo-600" size={28} fill="currentColor" />
-            Saved Positions
-          </h1>
-          <p className="text-lg font-light text-slate-800 tracking-tight leading-snug">
+      <DashboardHeader
+        icon={<Bookmark className="text-indigo-600" size={28} fill="currentColor" />}
+        title="Saved Positions"
+        subtitle={
+          <>
             Keep track of roles you love and <span className="font-semibold text-rose-600">never miss an opportunity</span>.
-          </p>
-          <p className="text-slate-500 mt-1 text-sm">
-            Manage and review the positions you've bookmarked for future reference.
-          </p>
-        </div>
-
-        {/* Clear All Action */}
-        {savedIds.length > 0 && (
-          <button
-            onClick={clearAllBookmarks}
-            className="flex items-center gap-2 text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100/70 border border-rose-100 px-4 py-2 rounded-xl text-sm font-semibold transition-all shrink-0 active:scale-95 duration-200"
-          >
-            <Trash2 size={16} />
-            Clear All
-          </button>
-        )}
-      </div>
+          </>
+        }
+        description="Manage and review the positions you've bookmarked for future reference."
+        action={
+          savedIds.length > 0 && (
+            <button
+              onClick={clearAllBookmarks}
+              className="flex items-center gap-2 text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100/70 border border-rose-100 px-4 py-2 rounded-xl text-sm font-semibold transition-all shrink-0 active:scale-95 duration-200"
+            >
+              <Trash2 size={16} />
+              Clear All
+            </button>
+          )
+        }
+      />
 
       {/* Toolbar & Filters (Only when there are saved positions) */}
       {savedIds.length > 0 && !isLoading && (
