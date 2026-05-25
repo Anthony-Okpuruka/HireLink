@@ -25,8 +25,8 @@ export default function AdminOverview() {
     const loadMetrics = async () => {
       try {
         setLoadingMetrics(true);
-        // assumed api: apiService.metrics.getOverview()
-        const resp = await (apiService as any).metrics.getOverview();
+        // Fetch admin system stats
+        const resp = await apiService.admin.getSystemMetrics();
         if (!mounted) return;
         setMetrics({
           totalUsers: resp.totalUsers ?? 0,

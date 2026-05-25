@@ -45,19 +45,17 @@ const EmployerOverview: React.FC = () => {
       try {
         setLoadingDashboard(true);
 
-        const [jobsResponse, applicationsResponse] = await Promise.all([
-          apiService.jobs.getJobs(),
-          apiService.applications.getMyApplications(),
-        ]);
-
-        const jobs = jobsResponse.jobs || [];
-        const applications = applicationsResponse.applications || [];
-
+        // Fetch dashboard stats
+        const employerStats = await apiService.jobs.getEmployerStats();
         setStats({
-          activeJobs: jobs.length,
-          totalApplicants: applications.length,
-          unreadNotifications: 0, // not available in current API
+          activeJobs: employerStats.activeJobs || 0,
+          totalApplicants: employerStats.totalApplicants || 0,
+          unreadNotifications: employerStats.unreadNotifications || 0,
         });
+
+        // Fetch Recent Jobs/Applications
+        const applicationsResponse = await apiService.applications.getMyApplications();
+        const applications = applicationsResponse.applications || [];
 
         const formattedApplicants: Applicant[] = applications
           .slice(0, 5)

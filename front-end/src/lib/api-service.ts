@@ -266,9 +266,47 @@ export const apiService = {
   },
 
   /**
+   * Admin Services
+   */
+  admin: {
+    getUsers: async (
+      params?: Record<string, any>,
+    ): Promise<PaginatedResponse<any>> => {
+      const query = params ? `?${new URLSearchParams(params).toString()}` : "";
+      try {
+        return await apiFetch(`/users${query}`, { method: "GET" });
+      } catch (err) {
+        logApiFallback("/users [GET]", err);
+        return {
+          message: "Loaded from mock data",
+          pagination: { total: 0, page: 1, limit: 10, pages: 1 },
+          users: [],
+        };
+      }
+    },
+    getSystemMetrics: async (): Promise<any> => {
+      try {
+        return await apiFetch(`/users/admin/stats`, { method: "GET" });
+      } catch (err) {
+        logApiFallback("/users/admin/stats [GET]", err);
+        return { totalUsers: 1200, activeJobs: 350, totalApplications: 2500 };
+      }
+    },
+  },
+
+  /**
    * Job Posting & Search Services
    */
   jobs: {
+    getEmployerStats: async (): Promise<{ activeJobs: number, totalApplicants: number, unreadNotifications: number }> => {
+      try {
+        return await apiFetch("/jobs/employer/stats", { method: "GET" });
+      } catch (err) {
+        logApiFallback("/jobs/employer/stats [GET]", err);
+        return { activeJobs: 0, totalApplicants: 0, unreadNotifications: 0 };
+      }
+    },
+
     getJobs: async (
       params?: Record<string, any>,
     ): Promise<PaginatedResponse<Job>> => {
@@ -390,6 +428,15 @@ export const apiService = {
    * Application Processing Services
    */
   applications: {
+    getStats: async (): Promise<{ total: number, applied: number, accepted: number, rejected: number }> => {
+      try {
+        return await apiFetch("/applications/stats", { method: "GET" });
+      } catch (err) {
+        logApiFallback("/applications/stats [GET]", err);
+        return { total: 0, applied: 0, accepted: 0, rejected: 0 };
+      }
+    },
+
     apply: async (
       jobId: number,
       coverLetter?: string,
