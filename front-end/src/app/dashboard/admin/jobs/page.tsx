@@ -77,7 +77,9 @@ export default function AdminJobsPage() {
     );
   }
 
-  if (jobs.length === 0) {
+  const hasJobs = jobs && jobs.length > 0;
+
+  if (!hasJobs) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center px-6 text-center">
         <div className="max-w-md">
@@ -89,7 +91,7 @@ export default function AdminJobsPage() {
             className="mx-auto"
           />
           <h1 className="mt-6 text-2xl font-bold text-slate-900">
-            No jobs available
+            No jobs found.
           </h1>
           <p className="mt-2 text-sm text-slate-500">
             There are currently no job postings in the system.
