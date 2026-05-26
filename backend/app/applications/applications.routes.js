@@ -2,6 +2,7 @@ import express from "express";
 import {
   applyForJob,
   getMyApplications,
+  getMyApplicationStats,
   withdrawApplication,
   getJobApplications,
   updateStatus,
@@ -16,6 +17,7 @@ import {
 const router = express.Router();
 
 // ─── Jobseeker Only Routes ────────────────────────────────────
+router.get("/stats", protect, restrictTo("jobseeker"), getMyApplicationStats);
 router.get("/", protect, restrictTo("jobseeker"), paginationQueryValidator, getMyApplications);
 router.get("/me", protect, restrictTo("jobseeker"), paginationQueryValidator, getMyApplications);
 router.post("/:jobId", protect, restrictTo("jobseeker"), applyForJobValidator, applyForJob);

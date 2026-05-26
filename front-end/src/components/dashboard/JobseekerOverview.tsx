@@ -28,6 +28,7 @@ import ApplicationTracker from "./ApplicationTracker";
 
 export default function JobseekerOverview() {
   const { user } = useAuth();
+  const [statsData, setStatsData] = useState({ total: 0, applied: 0, accepted: 0, rejected: 0 });
   const [applications, setApplications] = useState<Application[]>([]);
   const [recommendedJobs, setRecommendedJobs] = useState<Job[]>([]);
   const [activities, setActivities] = useState<ActivityLog[]>([]);
@@ -57,6 +58,10 @@ export default function JobseekerOverview() {
     async function loadDashboardData() {
       setIsLoading(true);
       try {
+        // Fetch applications stats
+        const statsRes = await apiService.applications.getStats();
+        setStatsData(statsRes);
+
         // Fetch My Applications
         const appRes = await apiService.applications.getMyApplications();
         if (appRes && appRes.applications) {
@@ -176,40 +181,31 @@ export default function JobseekerOverview() {
   }
 
   // Derive Seeker Statistics
-  const totalApps = applications.length;
-  const interviewApps = applications.filter(
-    (a) => a.status === "accepted",
-  ).length;
-  const rejectedApps = applications.filter(
-    (a) => a.status === "rejected",
-  ).length;
-  const pendingApps = applications.filter((a) => a.status === "applied").length;
-
   const stats = [
     {
       label: "Applications Sent",
-      value: totalApps,
+      value: statsData.total,
       icon: FileText,
       color: "text-slate-700 bg-slate-100",
       description: "Active submissions",
     },
     {
       label: "Interviews Booked",
-      value: interviewApps,
+      value: statsData.accepted,
       icon: Calendar,
       color: "text-slate-700 bg-slate-100",
       description: "Awaiting your chat",
     },
     {
       label: "Pending Review",
-      value: pendingApps,
+      value: statsData.applied,
       icon: Clock,
       color: "text-slate-700 bg-slate-100",
       description: "Under consideration",
     },
     {
       label: "Accepted",
-      value: interviewApps,
+      value: statsData.accepted,
       icon: CheckCircle2,
       color: "text-slate-700 bg-slate-100",
       description: "Approved by employers",

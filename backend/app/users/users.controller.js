@@ -10,8 +10,20 @@ import {
   updateJobseekerProfile,
   getEmployerProfile,
   updateEmployerProfile,
+  getSystemStatsFromDB,
 } from "./users.model.js";
 import { parsePagination, buildPagination } from "../core/pagination.js";
+
+// GET /api/admin/stats
+export const getSystemMetrics = async (req, res) => {
+  try {
+    const stats = await getSystemStatsFromDB();
+    res.status(200).json(stats);
+  } catch (error) {
+    console.error("Error fetching system metrics:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 // GET /api/users/me
 export const getMe = async (req, res) => {
