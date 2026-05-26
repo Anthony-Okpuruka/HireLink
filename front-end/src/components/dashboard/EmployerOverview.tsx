@@ -3,10 +3,12 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Briefcase, Users, Bell, Plus, Loader2 } from "lucide-react";
+import { Briefcase, Users, Bell, Plus, Loader2, LayoutPanelLeft } from "lucide-react";
+import { DashboardTallyCard } from "./DashboardTallyCard";
 
 import { useAuth } from "@/app/hooks/useAuth";
 import { apiService } from "@/lib/api-service";
+import { DashboardHeader } from "./DashboardHeader";
 
 interface DashboardStats {
   activeJobs: number;
@@ -96,18 +98,10 @@ const EmployerOverview: React.FC = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Employer Dashboard
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Welcome back, {user?.name || "Employer"}
-          </p>
-        </div>
-
+        <DashboardHeader icon={<LayoutPanelLeft/>} title="Employer Dashboard" subtitle={`Welcome back, ${user?.name || "Employer"}`} />
         <Link
           href="/dashboard/jobs/new"
-          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-medium transition"
+          className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-600 text-white px-5 py-3 rounded-xl font-medium transition"
         >
           <Plus className="w-5 h-5" />
           Post a Job
@@ -121,25 +115,11 @@ const EmployerOverview: React.FC = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border">
-              <Briefcase className="text-blue-600" />
-              <p className="text-gray-500 text-sm mt-4">Active Job Postings</p>
-              <h2 className="text-3xl font-bold">{stats.activeJobs}</h2>
-            </div>
+            <DashboardTallyCard label="Job Postings" value={stats.activeJobs} icon={<Briefcase/>} description="All active job postings"/>
 
-            <div className="bg-white p-6 rounded-2xl shadow-sm border">
-              <Users className="text-green-600" />
-              <p className="text-gray-500 text-sm mt-4">Total Applicants</p>
-              <h2 className="text-3xl font-bold">{stats.totalApplicants}</h2>
-            </div>
+            <DashboardTallyCard label="Total Applicants" value={stats.totalApplicants} icon={<Users/>} description="Total number of candidates"/>
 
-            <div className="bg-white p-6 rounded-2xl shadow-sm border">
-              <Bell className="text-yellow-600" />
-              <p className="text-gray-500 text-sm mt-4">Unread Notifications</p>
-              <h2 className="text-3xl font-bold">
-                {stats.unreadNotifications}
-              </h2>
-            </div>
+            <DashboardTallyCard label="Unread Notifications" value={stats.unreadNotifications} icon={<Bell/>} description="New alerts and application updates awaiting review"/>
           </div>
 
           <div className="bg-white p-6 rounded-2xl shadow-sm border">
@@ -159,22 +139,38 @@ const EmployerOverview: React.FC = () => {
                 No recent applicants yet.
               </p>
             ) : (
-              <div className="space-y-4">
-                {recentApplicants.map((applicant) => (
-                  <div
-                    key={applicant.id}
-                    className="flex justify-between border p-4 rounded-xl hover:bg-gray-50"
-                  >
-                    <div>
-                      <p className="font-medium">{applicant.name}</p>
-                      <p className="text-sm text-gray-500">{applicant.role}</p>
-                    </div>
-                    <p className="text-sm text-gray-400">
-                      {applicant.appliedAt}
-                    </p>
-                  </div>
-                ))}
-              </div>
+<div className="space-y-3">
+  {recentApplicants.map((applicant) => (
+    <div
+      key={applicant.id}
+      className="
+        flex items-center justify-between
+        rounded-2xl
+        border border-gray-100
+        bg-white
+        px-5 py-4
+        shadow-sm
+        transition-all duration-200
+        hover:border-gray-200
+        hover:shadow-md
+      "
+    >
+      <div>
+        <p className="text-sm font-semibold text-gray-900">
+          {applicant.name}
+        </p>
+
+        <p className="mt-1 text-sm text-gray-500">
+          {applicant.role}
+        </p>
+      </div>
+
+      <p className="text-xs font-medium text-gray-400">
+        {applicant.appliedAt}
+      </p>
+    </div>
+  ))}
+</div>
             )}
           </div>
         </>

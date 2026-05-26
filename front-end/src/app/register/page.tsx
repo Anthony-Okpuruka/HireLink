@@ -76,8 +76,8 @@ export default function Register() {
       {/* Left side: Illustration */}
       <div className="hidden lg:flex w-1/2 bg-cyan-50/50 items-center justify-center p-12 relative overflow-hidden">
         {/* Decorative blur layers */}
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-cyan-200/40 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/3" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-indigo-200/40 rounded-full blur-3xl translate-y-1/3 translate-x-1/3" />
+        <div className="absolute top-0 left-0 w-125 h-125 bg-cyan-200/40 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/3" />
+        <div className="absolute bottom-0 right-0 w-100 h-100 bg-indigo-200/40 rounded-full blur-3xl translate-y-1/3 translate-x-1/3" />
 
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
