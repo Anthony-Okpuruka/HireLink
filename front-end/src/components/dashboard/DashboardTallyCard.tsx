@@ -28,7 +28,7 @@ export function DashboardTallyCard({
       className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-start gap-4 group"
     >
       <div
-        className={`p-3.5 rounded-lg shrink-0 transition-transform group-hover:scale-105 ${colorClass} !text-slate-900`}
+        className={`p-3.5 rounded-lg shrink-0 transition-transform group-hover:scale-105 ${colorClass} text-slate-900!`}
       >
         {icon}
       </div>
