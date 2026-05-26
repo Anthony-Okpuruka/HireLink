@@ -11,6 +11,18 @@ export const createApplication = async (jobId, jobseekerId, coverLetter) => {
   return result.rows[0];
 };
 
+// Get aggregated application stats for a jobseeker
+export const getApplicationStatsByJobseeker = async (jobseekerId) => {
+  const result = await pool.query(
+    `SELECT status, COUNT(*)::int as count 
+     FROM applications 
+     WHERE jobseeker_id = $1 
+     GROUP BY status`,
+    [jobseekerId]
+  );
+  return result.rows;
+};
+
 // Get a single application by job id and jobseeker id
 export const findApplication = async (jobId, jobseekerId) => {
   const result = await pool.query(

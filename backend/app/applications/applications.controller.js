@@ -3,6 +3,7 @@ import {
   findApplication,
   findApplicationById,
   findApplicationsByJobseeker,
+  getApplicationStatsByJobseeker,
   findApplicationsByJob,
   updateApplicationStatus,
   deleteApplication,
@@ -65,11 +66,13 @@ export const applyForJob = async (req, res) => {
   }
 };
 
-// GET /api/applications  |  GET /api/applications/me
+// GET /api/applications  | // GET /api/applications/me
 export const getMyApplications = async (req, res) => {
   try {
+    const userId = req.user.id;
     const { page, limit, offset } = parsePagination(req.query);
-    const { rows, total } = await findApplicationsByJobseeker(req.user.id, { limit, offset });
+
+    const { rows, total } = await findApplicationsByJobseeker(userId, { limit, offset });
 
     res.status(200).json({
       message: "Applications retrieved successfully",
@@ -79,6 +82,25 @@ export const getMyApplications = async (req, res) => {
   } catch (error) {
     console.error("Get my applications error:", error.message);
     res.status(500).json({ message: "Server error getting applications" });
+  }
+};
+
+// GET /api/applications/stats
+export const getMyApplicationStats = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const rows = await getApplicationStatsByJobseeker(userId);
+
+    const stats = { total: 0, applied: 0, accepted: 0, rejected: 0 };
+    rows.forEach(row => {
+      stats[row.status] = row.count;
+      stats.total += row.count;
+    });
+    
+    res.json(stats);
+  } catch (error) {
+    console.error("Error fetching application stats:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 

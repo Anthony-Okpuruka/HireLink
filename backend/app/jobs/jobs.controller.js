@@ -5,6 +5,7 @@ import {
   updateJobById,
   deleteJobById,
   searchJobs,
+  getEmployerStatsFromDB,
 } from "./jobs.model.js";
 import { parsePagination, buildPagination } from "../core/pagination.js";
 
@@ -229,5 +230,17 @@ export const getJob = async (req, res) => {
   } catch (error) {
     console.error("Get job error:", error.message);
     res.status(500).json({ message: "Server error getting job listing" });
+  }
+};
+
+// GET /api/jobs/employer/stats
+export const getEmployerDashboardStats = async (req, res) => {
+  try {
+    const employerId = req.user.id;
+    const stats = await getEmployerStatsFromDB(employerId);
+    res.status(200).json(stats);
+  } catch (error) {
+    console.error("Error fetching employer stats:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };

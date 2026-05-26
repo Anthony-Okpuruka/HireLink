@@ -1,5 +1,34 @@
 import pool from "../core/db.js";
 
+// Get dashboard stats for employer
+export const getEmployerStatsFromDB = async (employerId) => {
+  const activeJobsResult = await pool.query(
+    `SELECT COUNT(*)::int as active_jobs FROM jobs WHERE employer_id = $1`,
+    [employerId]
+  );
+  
+  const applicantsResult = await pool.query(
+    `SELECT COUNT(*)::int as total_applicants 
+     FROM applications a 
+     JOIN jobs j ON a.job_id = j.id 
+     WHERE j.employer_id = $1`,
+    [employerId]
+  );
+
+  const notificationsResult = await pool.query(
+    `SELECT COUNT(*)::int as unread_notifications 
+     FROM notifications 
+     WHERE user_id = $1 AND read = false`,
+    [employerId]
+  );
+
+  return {
+    activeJobs: activeJobsResult.rows[0].active_jobs,
+    totalApplicants: applicantsResult.rows[0].total_applicants,
+    unreadNotifications: notificationsResult.rows[0].unread_notifications
+  };
+};
+
 const buildJobSearchFilters = (filters) => {
   const {
     title,

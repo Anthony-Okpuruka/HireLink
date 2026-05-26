@@ -6,6 +6,7 @@ import {
   getJobs,
   getJob,
   searchJobsList,
+  getEmployerDashboardStats,
 } from "./jobs.controller.js";
 import { protect, restrictTo } from "../core/middleware.js";
 import {
@@ -23,6 +24,7 @@ router.get("/", protect, paginationQueryValidator, getJobs);
 router.get("/:id", protect, getJob);
 
 // ─── Employer Only Routes ─────────────────────────────────────
+router.get("/employer/stats", protect, restrictTo("employer"), getEmployerDashboardStats);
 router.post("/", protect, restrictTo("employer"), postJobValidator, postJob);
 router.put("/:id", protect, restrictTo("employer"), updateJobValidator, updateJob);
 router.delete("/:id", protect, restrictTo("employer"), deleteJob);
