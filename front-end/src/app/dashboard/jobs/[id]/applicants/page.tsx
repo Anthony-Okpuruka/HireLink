@@ -4,7 +4,15 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiService, Application, Job } from "@/lib/api-service";
-import { Loader2, Check, X, ChevronLeft, Users, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Loader2,
+  Check,
+  X,
+  ChevronLeft,
+  Users,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 const JobApplicantsPage = () => {
@@ -16,7 +24,9 @@ const JobApplicantsPage = () => {
 
   const [job, setJob] = useState<Job | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
-  const [filterStatus, setFilterStatus] = useState<"all" | "applied" | "accepted" | "rejected">("all");
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "applied" | "accepted" | "rejected"
+  >("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
@@ -24,11 +34,15 @@ const JobApplicantsPage = () => {
 
   const filteredApplications = useMemo(() => {
     const recentApps = [...applications]
-      .sort((a, b) => new Date(b.applied_at).getTime() - new Date(a.applied_at).getTime())
+      .sort(
+        (a, b) =>
+          new Date(b.applied_at).getTime() - new Date(a.applied_at).getTime(),
+      )
       .slice(0, 15);
 
     return recentApps.filter((app) => {
-      const statusMatches = filterStatus === "all" || app.status === filterStatus;
+      const statusMatches =
+        filterStatus === "all" || app.status === filterStatus;
       const normalizedQuery = searchQuery.trim().toLowerCase();
       const searchMatches =
         normalizedQuery.length === 0 ||
@@ -132,7 +146,6 @@ const JobApplicantsPage = () => {
               <ChevronLeft size={16} /> Back to My Listings
             </button>
           }
-
         />
 
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
@@ -165,7 +178,15 @@ const JobApplicantsPage = () => {
                 Filter status
                 <select
                   value={filterStatus}
-                  onChange={(event) => setFilterStatus(event.target.value as "all" | "applied" | "accepted" | "rejected")}
+                  onChange={(event) =>
+                    setFilterStatus(
+                      event.target.value as
+                        | "all"
+                        | "applied"
+                        | "accepted"
+                        | "rejected",
+                    )
+                  }
                   className="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-900 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
                 >
                   <option value="all">All statuses</option>
@@ -203,9 +224,11 @@ const JobApplicantsPage = () => {
                 key={app.id}
                 className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm"
               >
-                <div 
+                <div
                   className="flex flex-col sm:flex-row justify-between gap-4 cursor-pointer hover:bg-slate-50 transition p-2 -m-2 rounded-lg"
-                  onClick={() => setExpandedId(expandedId === app.id ? null : app.id)}
+                  onClick={() =>
+                    setExpandedId(expandedId === app.id ? null : app.id)
+                  }
                 >
                   <div className="flex items-start gap-4">
                     <div className="h-12 w-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-semibold text-lg">
@@ -238,7 +261,11 @@ const JobApplicantsPage = () => {
                       {app.status}
                     </span>
                     <button className="p-2 text-slate-400 hover:text-slate-600 transition">
-                      {expandedId === app.id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                      {expandedId === app.id ? (
+                        <ChevronUp size={20} />
+                      ) : (
+                        <ChevronDown size={20} />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -253,7 +280,6 @@ const JobApplicantsPage = () => {
                         <p>{app.cover_letter}</p>
                       </div>
                     )}
-
                     {app.resume_url && (
                       <a
                         href={app.resume_url}
@@ -264,7 +290,8 @@ const JobApplicantsPage = () => {
                       >
                         View resume
                       </a>
-                    )}                    <div className="flex flex-wrap gap-3">
+                    )}{" "}
+                    <div className="flex flex-wrap gap-3">
                       <button
                         disabled={updatingId === app.id}
                         onClick={(e) => {
