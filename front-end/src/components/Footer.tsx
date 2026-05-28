@@ -50,77 +50,22 @@ export default function Footer() {
         </div>
 
         {/* Links Columns */}
-        <div className="flex flex-col gap-4">
-          <h4 className="text-white text-sm font-bold uppercase tracking-wider">
-            For Talent
-          </h4>
-          <ul className="flex flex-col gap-3 text-sm font-medium">
-            <li>
-              <Link
-                href="/jobs"
-                className="hover:text-white hover:underline decoration-blue-500/30 underline-offset-4 transition-colors"
-              >
-                Browse Jobs
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="hover:text-white hover:underline decoration-blue-500/30 underline-offset-4 transition-colors"
-              >
-                Salaries
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="hover:text-white hover:underline decoration-blue-500/30 underline-offset-4 transition-colors"
-              >
-                Career Advice
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="hover:text-white hover:underline decoration-blue-500/30 underline-offset-4 transition-colors"
-              >
-                Talent Profile
-              </Link>
-            </li>
-          </ul>
-        </div>
+        {/* Spacer to push columns to the right */}
+        <div className="hidden lg:block"></div>
 
         <div className="flex flex-col gap-4">
           <h4 className="text-white text-sm font-bold uppercase tracking-wider">
-            For Recruiters
+            Project Creators
           </h4>
-          <ul className="flex flex-col gap-3 text-sm font-medium">
-            <li>
-              <Link
-                href="#"
-                className="hover:text-white hover:underline decoration-blue-500/30 underline-offset-4 transition-colors"
-              >
-                Post a Job
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="hover:text-white hover:underline decoration-blue-500/30 underline-offset-4 transition-colors"
-              >
-                Browse Candidates
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="hover:text-white hover:underline decoration-blue-500/30 underline-offset-4 transition-colors"
-              >
-                Recruitment Plans
-              </Link>
-            </li>
-
-          </ul>
+          <p className="text-xs text-slate-400 leading-relaxed max-w-[200px]">
+            Developed for COS 202 (Computer Programming II) by Group 3.
+          </p>
+          <Link
+            href="/about#team"
+            className="text-xs font-semibold text-blue-500 hover:text-blue-400 hover:underline transition-colors mt-2"
+          >
+            Meet the Developers →
+          </Link>
         </div>
 
         <div className="flex flex-col gap-4">

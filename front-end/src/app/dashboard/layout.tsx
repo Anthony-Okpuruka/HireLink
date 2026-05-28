@@ -26,9 +26,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { UserProfile } from "@/components/dashboard/UserProfile";
-import { ApiStatusBadge } from "@/components/dashboard/ApiStatusBadge";
 import { LogoutButton } from "@/components/dashboard/LogoutButton";
-import { DevRoleSwitcher } from "@/components/dashboard/DevRoleSwitcher";
+import { ProtectedRoute } from "@/components/dashboard/ProtectedRoute";
 import { apiService } from "@/lib/api-service";
 
 interface NavItem {
@@ -53,20 +52,19 @@ function DashboardLayoutContent({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (user) {
+    if (isAuthenticated && user) {
       const fetchUnread = async () => {
         try {
           const response = await apiService.notifications.getAllNotifications();
           if (response?.notifications) {
-            const storedRead = JSON.parse(localStorage.getItem("read_notification_ids") || "[]").map(Number);
-            const unread = response.notifications.filter((n: any) => !n.read && !storedRead.includes(Number(n.id))).length;
+            const unread = response.notifications.filter((n: any) => !n.read).length;
             setUnreadCount(unread);
           }
         } catch (err) {
-          console.error(err);
+          // Silently catch so unauthenticated errors don't trigger Next.js overlay
         }
       };
 
@@ -336,7 +334,6 @@ function DashboardLayoutContent({
 
       <div className={`border-t border-slate-50 p-3 flex flex-col gap-3.5 ${isExpanded ? "items-stretch" : "items-center"}`}>
         <UserProfile isExpanded={isExpanded} />
-        <ApiStatusBadge isExpanded={isExpanded} />
         <LogoutButton isExpanded={isExpanded} />
       </div>
     </div>
@@ -396,8 +393,6 @@ function DashboardLayoutContent({
         )}
       </AnimatePresence>
 
-      {/* Floating Developer Preview Controls */}
-      <DevRoleSwitcher />
     </div>
   );
 }
@@ -408,6 +403,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    <ProtectedRoute>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </ProtectedRoute>
   );
 }

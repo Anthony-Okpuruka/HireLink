@@ -11,7 +11,7 @@ export default function Navbar() {
 
       <div className="space-x-6 hidden md:flex">
         <Link href="/jobs">Jobs</Link>
-        <Link href="/companies">Companies</Link>
+        <Link href="/how-it-works">How it Works</Link>
         <Link href="/about">About</Link>
       </div>
 
