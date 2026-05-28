@@ -52,10 +52,10 @@ function DashboardLayoutContent({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (user) {
+    if (isAuthenticated && user) {
       const fetchUnread = async () => {
         try {
           const response = await apiService.notifications.getAllNotifications();
@@ -64,7 +64,7 @@ function DashboardLayoutContent({
             setUnreadCount(unread);
           }
         } catch (err) {
-          console.error(err);
+          // Silently catch so unauthenticated errors don't trigger Next.js overlay
         }
       };
 
