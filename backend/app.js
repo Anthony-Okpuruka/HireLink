@@ -15,7 +15,7 @@ app.use(express.json());
 
 // CORS Middleware
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: "https://hire-link-eta.vercel.app",
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   credentials: true,
 }));
