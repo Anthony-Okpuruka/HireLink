@@ -21,7 +21,8 @@ import {
   AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Share2, Link as LinkIcon, Twitter, Linkedin, Copy } from "lucide-react";
+import { Share2, Link as LinkIcon, Copy } from "lucide-react";
+import { FaTwitter, FaLinkedin } from "react-icons/fa";
 import { formatSalary } from "@/lib/utils";
 import ApplicationTracker from "@/components/dashboard/ApplicationTracker";
 
