@@ -73,7 +73,11 @@ export default function JobseekerOverview() {
       try {
         // Fetch applications stats
         const statsRes = await apiService.applications.getStats();
-        setStatsData(statsRes);
+setStatsData({
+  ...statsRes,
+  // Safely uses the backend value if it exists, otherwise defaults to 0
+  interview: (statsRes as any).interview || 0 
+});
 
         // Fetch My Applications
         const appRes = await apiService.applications.getMyApplications();
