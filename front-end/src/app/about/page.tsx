@@ -158,7 +158,8 @@ export default function about() {
               { name: "Hillary Ilona", matric: "25120112059" },
               { name: "Adeyoyin Timilehin", matric: "25120112006" },
               { name: "Nasiru Muhammad Aminu", matric: "24120112032" },
-              { name: "Okpuruka Anthony", matric: "24120112044" }
+              { name: "Okpuruka Anthony", matric: "24120112044" },
+              { name: "Tomba Bobmanuel", matric: "24120112016" }
             ].map((member, i) => (
               <div
                 key={i}
